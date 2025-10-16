@@ -9,9 +9,7 @@
 <style>
 .txta {
     width: 100%;
-    min-height: 100px;
     font-family: Arial, sans-serif;
-    font-size: 16px;
     overflow: hidden;
     line-height: 1.4;
 }
@@ -77,6 +75,22 @@ tr td:first-child {
     font-weight: bold;
 }
 
+.extreme {
+    background-color: red;
+    color: white;
+}
+
+.high {
+    background-color: orange;
+}
+
+.medium {
+     background-color: yellow;
+}
+
+.low {
+     background-color: green;
+}
  @media screen and (max-width: 900px) {
 
 table {
@@ -122,12 +136,14 @@ table td:before {
   </head>
 <body>
 <table>
- <!--<colgroup>
+<colgroup>
         <col style="width: 10%;">
-        <col style="width: 30%;">
-        <col style="width: 30%;">
-        <col style="width: 30%;">
-      </colgroup>-->
+        <col style="width: 10%;">
+        <col style="width: 7%;">
+        <col style="width: 7%;">
+        <col style="width: 16%;">
+        <col style="width: 50%;">
+      </colgroup>
   <thead>
     <th>Risk description</th>
     <th>Risk category</th>
@@ -139,22 +155,43 @@ table td:before {
   <tbody>
     <tr>
         <td data-label="Risk description">
-            <textarea placeholder="Enter your thoughts here" class="txta"></textarea>
+            <textarea placeholder="Briefly describe the risk" class="txta"></textarea>
         </td>
         <td data-label="Risk category">
-            <textarea placeholder="Enter your thoughts here" class="txta"></textarea>
+        <label for="Risk category"></label>
+            <select id="Risk category" name="Risk category">
+                <option value="Technical">Technical</option>
+                <option value="Resource">Resource</option>
+                <option value="Financial">Financial</option>
+                <option value="Schedule">Schedule</option>
+                <option value="Stakeholder">Stakeholder</option>
+                <option value="External">External</option>
+                <option value="Operational">Operational</option>
+            </select>
         </td>
-        <td data-label="Likelihood">
-            <textarea placeholder="Enter your thoughts here" class="txta"></textarea>
+        <td id="likelihoodTD" data-label="Likelihood">
+        <label for="likelihood"></label>
+            <select id="likelihood" name="likelihood">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="extreme">Extreme</option>
+            </select>
         </td>
-        <td data-label="Impact">
-            <textarea placeholder="Enter your thoughts here" class="txta"></textarea>
+        <td  id="impactTD" data-label="Impact">
+        <label for="Impact"></label>
+            <select id="Impact" name="Impact">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="extreme">Extreme</option>
+            </select>
         </td>
         <td data-label="Risk owner">
-            <textarea placeholder="Enter your thoughts here" class="txta"></textarea>
+            <textarea placeholder="Enter the central risk owner here" class="txta"></textarea>
         </td>
         <td data-label="Risk response plan">
-            <textarea placeholder="Enter your thoughts here" class="txta"></textarea>
+            <textarea placeholder="Briefly explain the plans to address this risk" class="txta"></textarea>
         </td>
     </tr>
   </tbody>
@@ -226,5 +263,50 @@ for(let i of textareas) {
     });
   })(i);
 }
+
+// Apply classes to selects based on selection and add listeners
+document.addEventListener('DOMContentLoaded', function() {
+  const validClasses = ['low','medium','high','extreme'];
+
+  // helper to clear/add risk classes on an element
+  function setRiskClassOn(el, cls) {
+    if (!el) return;
+    el.classList.remove(...validClasses);
+    if (cls && validClasses.includes(cls)) el.classList.add(cls);
+  }
+
+  // apply the select's value as a class to the select and its containing TD
+  function updateFromSelect(selectEl) {
+    if (!selectEl) return;
+    const val = (selectEl.value || '').toLowerCase();
+    // apply to the select itself (if desired)
+    setRiskClassOn(selectEl, val);
+    // apply to the containing td (closest)
+    const td = selectEl.closest('td');
+    if (td) setRiskClassOn(td, val);
+  }
+
+  const likelihood = document.getElementById('likelihood');
+  const likelihoodTD = document.getElementById('likelihoodTD');
+  const impact = document.getElementById('Impact');
+  const impactTD = document.getElementById('impactTD');
+
+  if (likelihood) {
+    likelihood.addEventListener('input', () => updateFromSelect(likelihood));
+    likelihood.addEventListener('change', () => updateFromSelect(likelihood));
+    // initialize cell and select class
+    updateFromSelect(likelihood);
+    // ensure TD has no leftover classes if select missing value
+    if (likelihoodTD && !likelihood) setRiskClassOn(likelihoodTD, '');
+  }
+
+  if (impact) {
+    impact.addEventListener('input', () => updateFromSelect(impact));
+    impact.addEventListener('change', () => updateFromSelect(impact));
+    // initialize
+    updateFromSelect(impact);
+    if (impactTD && !impact) setRiskClassOn(likeliimpactTDhoodTD, '');
+  }
+});
 </script>
 </html>
