@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+  <title>Work Breakdown Structure</title>
+  <style>
+    :root {
+        --AIMblue: #4353A3;
+        --darkBlue: #38416D;
+        --teal: #5DC8B9;
+        --cream: #F1EEDE;
+        --grey: #e7e9ec;
+        --rust: #AF4510;
+        --navy: #12195C;
+        --white: #ffffff;
+        --lightBlue: #AEBAE4;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px;
+      background-color: var(--cream);
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: var(--darkBlue);
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.5em;
+    }
+
+    .main-layout {
+      display: flex;
+      gap: 30px;
+    }
+
+    .sidebar {
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    .source-items {
+      background: var(--white);
+      border: 2px solid var(--AIMblue);
+      border-radius: 12px;
+      padding: 20px;
+      position: sticky;
+      top: 20px;
+    }
+
+    .source-title {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: var(--AIMblue);
+      margin-bottom: 20px;
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--AIMblue);
+    }
+
+    .source-section {
+      margin-bottom: 25px;
+    }
+
+    .source-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .source-section-title {
+      font-weight: 600;
+      color: var(--darkBlue);
+      margin-bottom: 12px;
+      font-size: 0.95em;
+    }
+
+    .wbs-area {
+      flex: 1;
+    }
+
+    .project-title {
+      text-align: center;
+      color: var(--white);
+      background: var(--darkBlue);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      font-size: 1.8em;
+      font-weight: 600;
+    }
+
+    .wbs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .wbs-column {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .wbs-box {
+      background: var(--white);
+      border: 2px solid var(--darkBlue);
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .wbs-box.level-2 {
+      background: var(--lightBlue);
+      color: var(--darkBlue);
+      font-weight: 600;
+      font-size: 1.05em;
+    }
+
+    .level-3-container {
+      background: var(--white);
+      border: 2px solid var(--teal);
+      border-radius: 8px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .level-3-slot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 50px;
+      padding: 10px;
+      background: var(--cream);
+      border-radius: 6px;
+    }
+
+    .level-3-number {
+      font-weight: 600;
+      color: var(--darkBlue);
+      font-size: 0.95em;
+      min-width: 30px;
+    }
+
+    .level-3-drop-zone {
+      flex: 1;
+      background: var(--grey);
+      border: 2px dashed var(--lightBlue);
+      border-radius: 6px;
+      padding: 12px;
+      min-height: 45px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      color: #999;
+      font-style: italic;
+      font-size: 0.85em;
+    }
+
+    .level-3-drop-zone.drag-over {
+      background: #e6f2ff;
+      border-color: var(--AIMblue);
+      border-style: solid;
+    }
+
+    .level-3-drop-zone.filled {
+      background: var(--white);
+      border: none;
+      color: var(--darkBlue);
+      font-style: normal;
+      padding: 8px 12px;
+    }
+
+    .level-3-task {
+      background: var(--white);
+      border: 2px solid var(--teal);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.9em;
+      cursor: move;
+      transition: all 0.3s ease;
+      margin-bottom: 10px;
+    }
+
+    .level-3-task:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .level-3-task.dragging {
+      opacity: 0.5;
+      transform: scale(0.95);
+    }
+
+    .draggable-item {
+      cursor: move;
+      transition: all 0.3s ease;
+      margin-bottom: 10px;
+    }
+
+    .draggable-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .draggable-item.dragging {
+      opacity: 0.5;
+      transform: scale(0.95);
+    }
+
+    .drop-zone {
+      background: var(--grey);
+      border: 2px dashed var(--lightBlue);
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 80px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #999;
+      font-style: italic;
+    }
+
+    .drop-zone.drag-over {
+      background: #e6f2ff;
+      border-color: var(--AIMblue);
+      border-style: solid;
+      transform: scale(1.02);
+    }
+
+    .drop-zone.filled {
+      padding: 0;
+      background: transparent;
+      border: none;
+      min-height: auto;
+    }
+
+    .owner-section {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 2px solid var(--cream);
+    }
+
+    .owner-input {
+      padding: 10px;
+      border: 1px solid var(--lightBlue);
+      border-radius: 4px;
+      font-family: "IBM Plex Sans", sans-serif;
+      font-size: 0.9em;
+      width: 100%;
+    }
+
+    .owner-input:focus {
+      outline: none;
+      border-color: var(--AIMblue);
+    }
+
+    .owner-label {
+      font-size: 0.85em;
+      color: var(--darkBlue);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .example-badge {
+      display: inline-block;
+      background: var(--rust);
+      color: var(--white);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7em;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .instructions {
+      background: var(--lightBlue);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+      color: var(--darkBlue);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Work Breakdown Structure Builder</h1>
+    
+    <div class="main-layout">
+      <!-- Sidebar with draggable items -->
+      <div class="sidebar">
+        <div class="source-items">
+          <div class="source-title">Draggable Items</div>
+          
+          <div class="source-section">
+            <div class="source-section-title">Level 2 Phases</div>
+            <div class="wbs-box level-2 draggable-item" draggable="true" data-level="2">
+              Project Initiation
+            </div>
+            <div class="wbs-box level-2 draggable-item" draggable="true" data-level="2">
+              Planning
+            </div>
+            <div class="wbs-box level-2 draggable-item" draggable="true" data-level="2">
+              Design
+            </div>
+          </div>
+
+          <div class="source-section">
+            <div class="source-section-title">Level 3 Tasks</div>
+            
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Define project scope
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Identify stakeholders
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Create project charter
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Develop project plan
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Define requirements
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Create schedule
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Resource planning
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Create wireframes
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Design UI/UX
+            </div>
+            <div class="level-3-task draggable-item" draggable="true" data-level="3">
+              Approve design
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main WBS area -->
+      <div class="wbs-area">
+        <div class="project-title">Project: Website Development</div>
+
+        <div class="instructions">
+          <strong>Instructions:</strong> Drag Level 2 phases to the top row, then drag Level 3 tasks to match their numbered slots. Fill in the work package owner at the bottom of each column.
+        </div>
+
+        <div class="wbs-grid">
+          <!-- Column 1 -->
+          <div class="wbs-column">
+            <div class="drop-zone level-2-zone" data-level="2">Drop Level 2 here</div>
+            <div class="level-3-container">
+              <div class="level-3-slot">
+                <div class="level-3-number">1.1</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">1.2</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">1.3</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="owner-section">
+                <div class="owner-label">Work Package Owner:</div>
+                <input type="text" class="owner-input" placeholder="e.g., Project Manager">
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2 -->
+          <div class="wbs-column">
+            <div class="drop-zone level-2-zone" data-level="2">Drop Level 2 here</div>
+            <div class="level-3-container">
+              <div class="level-3-slot">
+                <div class="level-3-number">2.1</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">2.2</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">2.3</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">2.4</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="owner-section">
+                <div class="owner-label">Work Package Owner:</div>
+                <input type="text" class="owner-input" placeholder="e.g., Project Manager">
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 3 -->
+          <div class="wbs-column">
+            <div class="drop-zone level-2-zone" data-level="2">Drop Level 2 here</div>
+            <div class="level-3-container">
+              <div class="level-3-slot">
+                <div class="level-3-number">3.1</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">3.2</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">3.3</div>
+                <div class="level-3-drop-zone" data-level="3">Drop task here</div>
+              </div>
+              <div class="owner-section">
+                <div class="owner-label">Work Package Owner:</div>
+                <input type="text" class="owner-input" placeholder="e.g., Design Lead">
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 4 - Example -->
+          <div class="wbs-column">
+            <div class="wbs-box level-2">
+              Development <span class="example-badge">EXAMPLE</span>
+            </div>
+            <div class="level-3-container">
+              <div class="level-3-slot">
+                <div class="level-3-number">4.1</div>
+                <div class="level-3-drop-zone filled">Set up development environment</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">4.2</div>
+                <div class="level-3-drop-zone filled">Front-end development</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">4.3</div>
+                <div class="level-3-drop-zone filled">Back-end development</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">4.4</div>
+                <div class="level-3-drop-zone filled">Database integration</div>
+              </div>
+              <div class="owner-section">
+                <div class="owner-label">Work Package Owner:</div>
+                <input type="text" class="owner-input" value="Dev Team Lead">
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 5 - Example -->
+          <div class="wbs-column">
+            <div class="wbs-box level-2">
+              Testing <span class="example-badge">EXAMPLE</span>
+            </div>
+            <div class="level-3-container">
+              <div class="level-3-slot">
+                <div class="level-3-number">5.1</div>
+                <div class="level-3-drop-zone filled">Write test cases</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">5.2</div>
+                <div class="level-3-drop-zone filled">Perform functional testing</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">5.3</div>
+                <div class="level-3-drop-zone filled">Bug fixing</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">5.4</div>
+                <div class="level-3-drop-zone filled">User acceptance testing</div>
+              </div>
+              <div class="owner-section">
+                <div class="owner-label">Work Package Owner:</div>
+                <input type="text" class="owner-input" value="QA Lead">
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 6 - Example -->
+          <div class="wbs-column">
+            <div class="wbs-box level-2">
+              Deployment <span class="example-badge">EXAMPLE</span>
+            </div>
+            <div class="level-3-container">
+              <div class="level-3-slot">
+                <div class="level-3-number">6.1</div>
+                <div class="level-3-drop-zone filled">Set up hosting</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">6.2</div>
+                <div class="level-3-drop-zone filled">Deploy to production</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">6.3</div>
+                <div class="level-3-drop-zone filled">Final testing</div>
+              </div>
+              <div class="owner-section">
+                <div class="owner-label">Work Package Owner:</div>
+                <input type="text" class="owner-input" value="DevOps Engineer">
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 7 - Example -->
+          <div class="wbs-column">
+            <div class="wbs-box level-2">
+              Maintenance <span class="example-badge">EXAMPLE</span>
+            </div>
+            <div class="level-3-container">
+              <div class="level-3-slot">
+                <div class="level-3-number">7.1</div>
+                <div class="level-3-drop-zone filled">Monitor performance</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">7.2</div>
+                <div class="level-3-drop-zone filled">Fix post-launch bugs</div>
+              </div>
+              <div class="level-3-slot">
+                <div class="level-3-number">7.3</div>
+                <div class="level-3-drop-zone filled">Provide support</div>
+              </div>
+              <div class="owner-section">
+                <div class="owner-label">Work Package Owner:</div>
+                <input type="text" class="owner-input" value="Support Team">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let draggedItem = null;
+
+    function initDragAndDrop() {
+      const draggableItems = document.querySelectorAll('.draggable-item');
+      const dropZones = document.querySelectorAll('.drop-zone, .level-3-drop-zone');
+
+      draggableItems.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+      });
+
+      dropZones.forEach(zone => {
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('drop', handleDrop);
+        zone.addEventListener('dragleave', handleDragLeave);
+        zone.addEventListener('dragenter', handleDragEnter);
+      });
+    }
+
+    function handleDragStart(e) {
+      draggedItem = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+      document.querySelectorAll('.drop-zone, .level-3-drop-zone').forEach(zone => {
+        zone.classList.remove('drag-over');
+      });
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      if (this.classList.contains('drop-zone') || this.classList.contains('level-3-drop-zone')) {
+        this.classList.add('drag-over');
+      }
+    }
+
+    function handleDragLeave(e) {
+      if (e.target === this) {
+        this.classList.remove('drag-over');
+      }
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      this.classList.remove('drag-over');
+      
+      if (draggedItem) {
+        const draggedLevel = draggedItem.getAttribute('data-level');
+        const zoneLevel = this.getAttribute('data-level');
+        
+        // Check if item level matches zone level
+        if (draggedLevel === zoneLevel) {
+          if (draggedLevel === '2') {
+            // For level 2 items, replace the drop zone
+            this.innerHTML = '';
+            this.appendChild(draggedItem);
+            this.classList.add('filled');
+            draggedItem.classList.remove('draggable-item');
+            draggedItem.removeAttribute('draggable');
+          } else if (draggedLevel === '3') {
+            // For level 3 items, replace the placeholder text
+            const taskText = draggedItem.textContent.trim();
+            this.textContent = taskText;
+            this.classList.add('filled');
+            draggedItem.remove();
+          }
+        }
+      }
+      
+      return false;
+    }
+
+    // Initialize on load
+    initDragAndDrop();
+  </script>
+</body>
+</html>
