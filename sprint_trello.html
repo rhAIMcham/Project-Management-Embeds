@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trello-Style Board</title>
+    <style>
+            :root {
+        --AIMblue: #4353A3;
+        --darkBlue: #38416D;
+        --teal: #5DC8B9;
+        --cream: #F1EEDE;
+        --grey: #e7e9ec;
+        --rust: #AF4510;
+        --navy: #12195C;
+        --white: #ffffff;
+        --lightBlue: #AEBAE4;
+    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+      font-family: "IBM Plex Sans", sans-serif;
+            min-height: 90vh;
+   padding: 30px 20px;
+        }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: var(--darkBlue);
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2em;
+      font-weight: 600;
+    }
+
+    .board {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 20px;
+      justify-content: space-around;
+    }
+
+    .column {
+      background: #ebecf0;
+      border-radius: 8px;
+      padding: 12px;
+      min-width: 320px;
+      max-width: 320px;
+      flex-shrink: 0;
+    }
+
+    .column-header {
+      font-weight: 600;
+      font-size: 1.1em;
+      color: #172b4d;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+    }
+
+    .cards-container {
+      min-height: 100px;
+      padding: 4px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 10px;
+      cursor: move;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+
+    .card.dragging {
+      opacity: 0.5;
+      transform: rotate(3deg);
+    }
+
+    .cards-container.drag-over {
+      background: #d5dce4;
+      border-radius: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: #5e6c84;
+      margin-bottom: 4px;
+    }
+
+    select, input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 2px solid #dfe1e6;
+      border-radius: 4px;
+      font-size: 0.95em;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: #0079bf;
+    }
+
+    .add-card-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: #5e6c84;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.95em;
+      text-align: left;
+      transition: background 0.2s;
+    }
+
+    .add-card-btn:hover {
+      background: #d5dce4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Project Board</h1>
+    
+    <div class="board">
+      <div class="column">
+        <div class="column-header">To Do</div>
+        <div class="cards-container" data-column="todo">
+          <div class="card" draggable="true">
+            <div class="form-group">
+              <label>Assigned to</label>
+              <select>
+                <option value="">Select staff member</option>
+                <option value="SME">Deidre Singh (Subject matter expert)</option>
+                <option value="LD">Storyboard creation – Demeter Jones (Learning designer)</option>
+                <option value="DPD">Alpha build – Catie Birds (Digital production designer)</option>
+                <option value="GD">Asset creation – Samsai Truong (Graphic designer)</option>
+                <option value="QA">Quality assurance (testing) – Priya Singh (Project lead)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Task</label>
+              <input type="text" placeholder="Enter task description">
+            </div>
+            <div class="form-group">
+              <label>Due date</label>
+              <input type="date">
+            </div>
+          </div>
+        </div>
+        <button class="add-card-btn" onclick="addCard('todo')">+ Add a card</button>
+      </div>
+
+      <div class="column">
+        <div class="column-header">In Progress</div>
+        <div class="cards-container" data-column="inprogress"></div>
+        <button class="add-card-btn" onclick="addCard('inprogress')">+ Add a card</button>
+      </div>
+
+      <div class="column">
+        <div class="column-header">Done</div>
+        <div class="cards-container" data-column="done"></div>
+        <button class="add-card-btn" onclick="addCard('done')">+ Add a card</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let draggedCard = null;
+
+    function initDragAndDrop() {
+      const cards = document.querySelectorAll('.card');
+      const containers = document.querySelectorAll('.cards-container');
+
+      cards.forEach(card => {
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+      });
+
+      containers.forEach(container => {
+        container.addEventListener('dragover', handleDragOver);
+        container.addEventListener('drop', handleDrop);
+        container.addEventListener('dragleave', handleDragLeave);
+        container.addEventListener('dragenter', handleDragEnter);
+      });
+    }
+
+    function handleDragStart(e) {
+      draggedCard = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+      document.querySelectorAll('.cards-container').forEach(container => {
+        container.classList.remove('drag-over');
+      });
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      if (e.target.classList.contains('cards-container')) {
+        e.target.classList.add('drag-over');
+      }
+    }
+
+    function handleDragLeave(e) {
+      if (e.target.classList.contains('cards-container')) {
+        e.target.classList.remove('drag-over');
+      }
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      let dropZone = e.target;
+      if (!dropZone.classList.contains('cards-container')) {
+        dropZone = dropZone.closest('.cards-container');
+      }
+      
+      if (dropZone && draggedCard) {
+        dropZone.classList.remove('drag-over');
+        dropZone.appendChild(draggedCard);
+      }
+      
+      return false;
+    }
+
+    function addCard(column) {
+      const container = document.querySelector(`[data-column="${column}"]`);
+      const newCard = document.createElement('div');
+      newCard.className = 'card';
+      newCard.draggable = true;
+      newCard.innerHTML = `
+        <div class="form-group">
+          <label>Assigned to</label>
+         <select>
+                <option value="">Select staff member</option>
+                <option value="SME">Deidre Singh (Subject matter expert)</option>
+                <option value="LD">Storyboard creation – Demeter Jones (Learning designer)</option>
+                <option value="DPD">Alpha build – Catie Birds (Digital production designer)</option>
+                <option value="GD">Asset creation – Samsai Truong (Graphic designer)</option>
+                <option value="QA">Quality assurance (testing) – Priya Singh (Project lead)</option>
+              </select>
+        </div>
+        <div class="form-group">
+          <label>Task</label>
+          <input type="text" placeholder="Enter task description">
+        </div>
+        <div class="form-group">
+          <label>Due date</label>
+          <input type="date">
+        </div>
+      `;
+      
+      container.appendChild(newCard);
+      initDragAndDrop();
+    }
+
+    // Initialize on page load
+    initDragAndDrop();
+  </script>
+</body>
+</html>

@@ -752,6 +752,7 @@ h1 {
   </style>
 </head>
 <body>
+  <!--TODO: adjust to the 2 generic projects, add task number and length limits into custom area.-->
   <div class="app-container">
     <div class="main-wrapper">
       <header class="header">
@@ -766,10 +767,10 @@ h1 {
       <section class="section-card">
         <div class="project-header">
           <h2 class="section-title">Projects</h2>
-          <div class="project-controls">
+          <!-- <div class="project-controls">
             <button class="btn-primary btn-sm" onclick="addProject()">+ Add Project</button>
             <button class="btn-secondary btn-sm" onclick="deleteProject()">Delete Project</button>
-          </div>
+          </div> -->
         </div>
         <div class="project-buttons" id="project-buttons"></div>
         
@@ -777,7 +778,7 @@ h1 {
         <div class="project-name-editor">
            <div id="project-name-container"></div>
           <!-- <label class="form-label">Project Name:</label>
-          <input type="text" class="form-input" id="project-name"> -->
+          <input type="text" class="form-input" id="project-name" maxlength="30"> -->
         </div>
 
         <div class="instructions-text">
@@ -881,7 +882,7 @@ h1 {
           
           <div class="form-group">
             <label class="form-label">Task Name</label>
-            <input type="text" class="form-input" id="task-name-input" placeholder="e.g., Prep walls">
+            <input type="text" class="form-input" id="task-name-input" placeholder="e.g., Prep walls" maxlength="50">
           </div>
           
           <div class="form-group">
@@ -969,6 +970,12 @@ const INITIAL_PROJECTS = [
       { id: "G", name: "Dry run", duration: 3, deps: ["F", "D"] },
     ],
   },
+  // Automatically included custom project (user cannot delete)
+  {
+    id: "p_custom",
+    name: "Custom Project",
+    tasks: []
+  }
 ];
 
 const DEFAULT_PROJECT_IDS = ['p1', 'p2', 'p3'];
@@ -983,7 +990,8 @@ const PADDING = 24;
 const state = {
   projects: JSON.parse(JSON.stringify(INITIAL_PROJECTS)),
   currentProjectId: INITIAL_PROJECTS[0].id,
-  stage: "esef",
+  // per-project stage map (esef | lslf | interactive | locked)
+  projectStages: {},
   ESin: {},
   EFin: {},
   LSin: {},
@@ -1004,13 +1012,26 @@ function isDefaultProject(projectId) {
   return DEFAULT_PROJECT_IDS.includes(projectId);
 }
 
+function getProjectStage(projectId) {
+  return state.projectStages[projectId] || 'esef';
+}
+
+function setProjectStage(projectId, stage) {
+  state.projectStages[projectId] = stage;
+}
+
+function allDefaultInteractive() {
+  return DEFAULT_PROJECT_IDS.every(id => getProjectStage(id) === 'interactive');
+}
+
 function resetProjectState() {
+  // Clear per-run inputs and constraints (keep per-project stages)
   state.ESin = {};
   state.EFin = {};
   state.LSin = {};
   state.LFin = {};
   state.minStart = {};
-  state.stage = "esef";
+  // Note: do NOT reset projectStages here – stages are tracked per-project
 }
 
 // ============================================================================
@@ -1112,9 +1133,11 @@ function renderHeader() {
   const stageNames = {
     esef: "Enter ES/EF",
     lslf: "Enter LS/LF",
-    interactive: "Interactive dragging"
+    interactive: "Interactive dragging",
+    locked: "Locked"
   };
-  document.getElementById('stage-badge').textContent = stageNames[state.stage];
+  const stage = getProjectStage(state.currentProjectId);
+  document.getElementById('stage-badge').textContent = stageNames[stage] || 'Enter ES/EF';
 }
 
 // ============================================================================
@@ -1125,14 +1148,26 @@ function renderProjectSelector() {
   const container = document.getElementById('project-buttons');
   container.innerHTML = '';
   
+  const customUnlocked = allDefaultInteractive();
+
   state.projects.forEach(p => {
     const btn = document.createElement('button');
-    btn.className = `project-button ${state.currentProjectId === p.id ? 'active' : ''}`;
+    const isActive = state.currentProjectId === p.id;
+    btn.className = `project-button ${isActive ? 'active' : ''}`;
+    const stageLabel = getProjectStage(p.id);
+    const subtitle = `${p.tasks.length} tasks • ${stageLabel === 'locked' ? 'Locked' : stageLabel}`;
     btn.innerHTML = `
       <div class="project-button-title">${p.name}</div>
-      <div class="project-button-subtitle">${p.tasks.length} tasks</div>
+      <div class="project-button-subtitle">${subtitle}</div>
     `;
-    btn.onclick = () => switchProject(p.id);
+    // Lock custom until default examples reached interactive
+    if (p.id === 'p_custom' && !customUnlocked) {
+      btn.disabled = true;
+      btn.title = 'Custom project locked until example projects reach Interactive stage';
+      btn.classList.add('project-button-locked');
+    } else {
+      btn.onclick = () => switchProject(p.id);
+    }
     container.appendChild(btn);
   });
   
@@ -1168,6 +1203,11 @@ function renderProjectSelector() {
 }
 
 function switchProject(projectId) {
+  // Prevent switching to locked custom project
+  if (projectId === 'p_custom' && !allDefaultInteractive()) {
+    alert('Custom project is locked until the three example projects reach Interactive stage.');
+    return;
+  }
   state.currentProjectId = projectId;
   resetProjectState();
   render();
@@ -1286,7 +1326,8 @@ function renderGridOverlay(maxTime) {
 
 function createTaskBar(task, rowIdx, computed, project) {
   const es = computed.ES[task.id];
-  const curStart = (state.stage === "interactive" || !isDefaultProject(state.currentProjectId)) 
+  const projectStage = getProjectStage(state.currentProjectId);
+  const curStart = (projectStage === "interactive" || !isDefaultProject(state.currentProjectId)) 
     ? (state.minStart[task.id] || es) 
     : es;
   const isCritical = computed.critical.has(task.id);
@@ -1300,7 +1341,7 @@ function createTaskBar(task, rowIdx, computed, project) {
   
   const bar = document.createElement('div');
   bar.className = `task-bar ${isCritical ? 'critical' : 'non-critical'} ${
-    state.stage === 'interactive' || !isDefaultProject(state.currentProjectId) 
+    projectStage === 'interactive' || !isDefaultProject(state.currentProjectId) 
       ? 'interactive' 
       : 'static'
   }`;
@@ -1316,7 +1357,8 @@ function createTaskBar(task, rowIdx, computed, project) {
 
 function createTaskBarContent(task, computed, project) {
   const isDefault = isDefaultProject(state.currentProjectId);
-  const inESEFStage = state.stage === 'esef';
+  const projectStage = getProjectStage(state.currentProjectId);
+  const inESEFStage = projectStage === 'esef';
   
   const esActive = (isDefault && inESEFStage) || !isDefault;
   const lsActive = (isDefault && !inESEFStage) || !isDefault;
@@ -1419,6 +1461,7 @@ function renderControls(project, computed) {
 }
 
 function renderDefaultProjectControls(container) {
+  const projectStage = getProjectStage(state.currentProjectId);
   const controls = {
     esef: { text: 'Check ES/EF', handler: checkESEF, className: 'btn-primary' },
     lslf: { text: 'Check LS/LF', handler: checkLSLF, className: 'btn-success' },
@@ -1428,7 +1471,8 @@ function renderDefaultProjectControls(container) {
     }
   };
   
-  const control = controls[state.stage];
+  const control = controls[projectStage];
+  if (!control) return;
   if (control.isHint) {
     const hint = document.createElement('div');
     hint.className = 'interactive-hint';
@@ -1461,7 +1505,7 @@ function renderCustomProjectControls(container, project) {
   } else {
     const hint = document.createElement('div');
     hint.className = 'interactive-hint';
-    hint.textContent = 'Fill in all ES, EF, LS, and LF values to submit for AI evaluation.';
+    hint.textContent = 'Fill in all ES, EF, LS, and LF values to export.';
     container.appendChild(hint);
   }
 }
@@ -1480,7 +1524,6 @@ function addResetButton(container) {
 // ============================================================================
 // EVENT HANDLERS - INPUT
 // ============================================================================
-
 
 function handleInputChange(e) {
   const { taskId, field } = e.target.dataset;
@@ -1512,8 +1555,10 @@ function handleInputChange(e) {
 function handleBarMouseDown(e) {
   const taskId = e.currentTarget.dataset.taskId;
   const project = getCurrentProject();
+  const projectStage = getProjectStage(state.currentProjectId);
 
-  if (state.stage !== "interactive" && isDefaultProject(state.currentProjectId)) return;
+  // For default projects, only allow dragging in interactive stage
+  if (projectStage !== "interactive" && isDefaultProject(state.currentProjectId)) return;
   
   const computed = computeCPM(project.tasks, state.minStart);
   const orig = state.minStart[taskId] || computed.ES[taskId];
@@ -1523,9 +1568,10 @@ function handleBarMouseDown(e) {
 
 function handleMouseMove(e) {
   if (!state.dragging) return;
-  
   const project = getCurrentProject();
-  if (!isDefaultProject(state.currentProjectId)) return;
+  const projectStage = getProjectStage(state.currentProjectId);
+  // For default projects, only allow dragging in interactive stage
+  if (projectStage !== "interactive" && isDefaultProject(state.currentProjectId)) return;
   
   // Get original computed values
   const originalComputed = computeCPM(project.tasks, state.minStart);
@@ -1612,7 +1658,8 @@ function checkESEF() {
         <p>Now enter LS/LF for each task.</p>
       </div>
     `);
-    state.stage = "lslf";
+    // set the project's stage to lslf
+    setProjectStage(state.currentProjectId, 'lslf');
     render();
   } else {
     showModal("Not quite yet", `
@@ -1636,7 +1683,13 @@ function checkLSLF() {
         <p>Drag tasks earlier/later to explore what happens within vs. beyond slack. Critical path tasks are red.</p>
       </div>
     `);
-    state.stage = "interactive";
+    // set the project's stage to interactive
+    setProjectStage(state.currentProjectId, 'interactive');
+    // If this was one of the default example projects, check whether to unlock custom
+    if (allDefaultInteractive()) {
+      // unlock custom project (set to esef)
+      setProjectStage('p_custom', 'esef');
+    }
     render();
   } else {
     showModal("LS/LF have issues", `
@@ -1683,39 +1736,8 @@ function closeModal() {
 }
 
 // ============================================================================
-// PROJECT MANAGEMENT
+// CUSTOM PROJECT MANAGEMENT
 // ============================================================================
-
-function addProject() {
-  const hasCustomProject = state.projects.some(p => !isDefaultProject(p.id));
-  if (hasCustomProject) {
-    alert("You can only create one custom project. Delete the existing custom project first.");
-    return;
-  }
-  
-  const newProject = {
-    id: `p${Date.now()}`,
-    name: 'Custom Project',
-    tasks: []
-  };
-  state.projects.push(newProject);
-  state.currentProjectId = newProject.id;
-  render();
-}
-
-function deleteProject() {
-  if (isDefaultProject(state.currentProjectId)) {
-    alert("Cannot delete default example projects. You can only delete your custom project.");
-    return;
-  }
-  
-  const project = getCurrentProject();
-  if (confirm(`Delete project "${project.name}"?`)) {
-    state.projects = state.projects.filter(p => p.id !== state.currentProjectId);
-    state.currentProjectId = state.projects[0].id;
-    render();
-  }
-}
 
 function resetProjectData() {
   if (isDefaultProject(state.currentProjectId)) {
@@ -1900,8 +1922,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ensure initial state is properly set
   state.projects = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
   state.currentProjectId = INITIAL_PROJECTS[0].id;
-  state.stage = "esef";
   
+  // initialize per-project stages: default examples start at 'esef', custom locked
+  state.projectStages = {};
+  state.projects.forEach(p => {
+    if (p.id === 'p_custom') {
+      state.projectStages[p.id] = 'locked';
+    } else {
+      state.projectStages[p.id] = 'esef';
+    }
+  });
+
   // Initialize empty state objects
   resetProjectState();
   
