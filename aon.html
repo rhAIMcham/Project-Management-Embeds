@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop SVG Quiz</title>
+    <style>
+            :root {
+        --AIMblue: #4353A3;
+        --darkBlue: #38416D;
+        --teal: #5DC8B9;
+        --cream: #F1EEDE;
+        --grey: #e7e9ec;
+        --rust: #AF4510;
+        --navy: #12195C;
+        --white: #ffffff;
+        --lightBlue: #AEBAE4;
+    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+      font-family: "IBM Plex Sans", sans-serif;
+      background-color: var(--cream);
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--darkBlue);
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--darkBlue);
+            margin-bottom: 30px;
+        }
+
+        .letters-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .letter-tile {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #b9eae3 0%, #7dd3c0 100%);
+            border: 3px solid var(--darkBlue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--darkBlue);
+            cursor: move;
+            user-select: none;
+            transition: transform 0.2s;
+        }
+
+        .letter-tile:hover {
+            transform: scale(1.1);
+        }
+
+        .letter-tile.dragging {
+            opacity: 0.5;
+        }
+
+        .svg-container {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .drop-zone {
+            cursor: pointer;
+        }
+
+        .drop-zone.highlight {
+            filter: brightness(1.2);
+            stroke-width: 3;
+        }
+
+        .placed-letter {
+            pointer-events: none;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn {
+            background: var(--darkBlue);
+            color: white;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .reset-btn:hover {
+            background: #cbd5e0;
+        }
+
+        .result-message {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .result-message.correct {
+            background: var(--teal);
+        }
+
+        .result-message.incorrect {
+            background: var(--rust);
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Flowchart Puzzle</h1>
+        <p class="subtitle">Drag the letters to complete the flowchart correctly</p>
+
+        <div class="letters-container" id="lettersContainer"></div>
+
+        <div class="svg-container">
+            <svg id="flowchart" viewBox="0 0 2220 680">
+                <!-- Arrows and paths -->
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M467.9,392.1c67.3-48.7,134.5-97.3,201.8-146"/>
+                    <path fill="#12195c" d="M688.2,232.7c-6.4,9.5-13.2,22.9-15.7,33.6l-5.3-18.4-15.8-10.8c10.9,1,25.8-1.3,36.8-4.4Z"/>
+                </g>
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M823.8,195.5h200.9"/>
+                    <path fill="#12195c" d="M1047.6,195.5c-10.8,4-24.1,10.8-32.4,18l6.5-18-6.5-18c8.3,7.2,21.6,14,32.4,18Z"/>
+                </g>
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M1200.1,195.5c55.4,4.5,110.8,8.9,166.2,13.4"/>
+                    <path fill="#12195c" d="M1389.1,210.8c-11,3.1-24.9,8.8-33.7,15.4l7.9-17.4-5-18.5c7.7,7.9,20.4,15.7,30.8,20.6Z"/>
+                </g>
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M1578.1,243.8c94.1,41.3,188.3,82.6,282.4,123.9"/>
+                    <path fill="#12195c" d="M1881.5,376.9c-11.5-.7-26.4.2-36.9,3.5l13.2-13.9,1.3-19.1c4.7,9.9,14.2,21.5,22.4,29.5Z"/>
+                </g>
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M1261.1,484.6c7.2-3.7,302-1.1,387.3-.2"/>
+                    <path fill="#12195c" d="M1671.3,484.6c-10.8,3.9-24.2,10.6-32.5,17.8l6.7-18-6.4-18.1c8.2,7.3,21.5,14.2,32.2,18.3Z"/>
+                </g>
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M1230.6,461.6c59.6-41.4,119.1-82.8,178.7-124.2"/>
+                    <path fill="#12195c" d="M1428.1,324.3c-6.6,9.4-13.6,22.6-16.3,33.3l-4.9-18.5-15.6-11.1c10.9,1.2,25.8-.8,36.9-3.7Z"/>
+                </g>
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M859.4,226c80,51.8,160.1,103.7,240.1,155.5"/>
+                    <path fill="#12195c" d="M1118.7,393.9c-11.2-2.5-26.1-4-37-2.5l15.3-11.6,4.3-18.7c3,10.6,10.5,23.5,17.4,32.7Z"/>
+                </g>
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M739.1,482.7c104.5.3,209,.6,313.6.9"/>
+                    <path fill="#12195c" d="M1075.5,483.6c-10.8,4-24.1,10.7-32.4,17.9l6.6-18-6.5-18c8.3,7.2,21.6,14.1,32.3,18.1Z"/>
+                </g>
+                <g>
+                    <path stroke="#12195c" stroke-width="3.8" fill="none" stroke-linecap="round" stroke-miterlimit="10" d="M445.9,475.2c42.4,1.8,84.8,3.7,127.1,5.5"/>
+                    <path fill="#12195c" d="M595.9,481.6c-10.9,3.5-24.6,9.8-33.1,16.6l7.3-17.7-5.7-18.3c8,7.6,21,14.9,31.6,19.4Z"/>
+                </g>
+
+                <!-- BEGIN and END boxes -->
+                <rect fill="#bec8e9" x="86" y="393.9" width="433.9" height="175.4" rx="53.5" ry="53.5"/>
+                <text fill="#12195c" font-family="Arial, sans-serif" font-size="79.6" font-weight="bold" transform="translate(182 505.7)">BEGIN</text>
+                
+                <rect fill="#bec8e9" x="1700.1" y="393.9" width="433.9" height="175.4" rx="53.5" ry="53.5"/>
+                <text fill="#12195c" font-family="Arial, sans-serif" font-size="79.6" font-weight="bold" transform="translate(1839 505.7)">END</text>
+
+                <!-- Drop zones (empty circles) -->
+                <circle class="drop-zone" data-position="topLeft" fill="#b9eae3" stroke="#12195c" stroke-width="1.6" stroke-miterlimit="10" cx="795.7" cy="198.4" r="103.9"/>
+                <circle class="drop-zone" data-position="topMiddle" fill="#b9eae3" stroke="#12195c" stroke-width="1.6" stroke-miterlimit="10" cx="1162.2" cy="198.4" r="103.9"/>
+                <circle class="drop-zone" data-position="topRight" fill="#b9eae3" stroke="#12195c" stroke-width="1.6" stroke-miterlimit="10" cx="1497.7" cy="233.7" r="103.9"/>
+                <circle class="drop-zone" data-position="bottomLeft" fill="#b9eae3" stroke="#12195c" stroke-width="1.6" stroke-miterlimit="10" cx="715.3" cy="481.6" r="103.9"/>
+                
+                <!-- Pre-filled E circle -->
+                <circle fill="#b9eae3" stroke="#12195c" stroke-width="1.6" stroke-miterlimit="10" cx="1195.8" cy="481.6" r="103.9"/>
+                <text fill="#12195c" font-family="Arial, sans-serif" font-size="113.7" font-weight="bold" transform="translate(1162.7 516)">E</text>
+            </svg>
+        </div>
+
+        <div class="button-container">
+            <button class="submit-btn" id="submitBtn" disabled>Submit Answer</button>
+            <button class="reset-btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div id="resultMessage" class="result-message hidden"></div>
+    </div>
+
+    <script>
+        const state = {
+            answers: {
+                topLeft: null,
+                topMiddle: null,
+                topRight: null,
+                bottomLeft: null
+            },
+            draggedLetter: null
+        };
+
+        const correctAnswers = {
+            topLeft: 'A',
+            topMiddle: 'B',
+            topRight: 'C',
+            bottomLeft: 'D'
+        };
+
+        const positions = {
+            topLeft: { cx: 795.7, cy: 198.4 },
+            topMiddle: { cx: 1162.2, cy: 198.4 },
+            topRight: { cx: 1497.7, cy: 233.7 },
+            bottomLeft: { cx: 715.3, cy: 481.6 }
+        };
+
+        function init() {
+            renderLetters();
+            setupDropZones();
+            setupButtons();
+        }
+
+        function renderLetters() {
+            const container = document.getElementById('lettersContainer');
+            container.innerHTML = '';
+            
+            const usedLetters = Object.values(state.answers).filter(v => v !== null);
+            const availableLetters = ['A', 'B', 'C', 'D'].filter(l => !usedLetters.includes(l));
+
+            availableLetters.forEach(letter => {
+                const tile = document.createElement('div');
+                tile.className = 'letter-tile';
+                tile.textContent = letter;
+                tile.draggable = true;
+                tile.dataset.letter = letter;
+
+                tile.addEventListener('dragstart', (e) => {
+                    state.draggedLetter = letter;
+                    tile.classList.add('dragging');
+                });
+
+                tile.addEventListener('dragend', (e) => {
+                    tile.classList.remove('dragging');
+                });
+
+                container.appendChild(tile);
+            });
+
+            updateSubmitButton();
+        }
+
+        function setupDropZones() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('highlight');
+                });
+
+                zone.addEventListener('dragleave', (e) => {
+                    zone.classList.remove('highlight');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('highlight');
+                    
+                    const position = zone.dataset.position;
+                    if (state.draggedLetter) {
+                        state.answers[position] = state.draggedLetter;
+                        updateSVG();
+                        renderLetters();
+                        hideResult();
+                    }
+                });
+
+                zone.addEventListener('click', (e) => {
+                    const position = zone.dataset.position;
+                    if (state.answers[position]) {
+                        state.answers[position] = null;
+                        updateSVG();
+                        renderLetters();
+                        hideResult();
+                    }
+                });
+            });
+        }
+
+        function updateSVG() {
+            const svg = document.getElementById('flowchart');
+            
+            // Remove existing placed letters
+            const existingLetters = svg.querySelectorAll('.placed-letter');
+            existingLetters.forEach(el => el.remove());
+
+            // Add current letters
+            Object.keys(state.answers).forEach(position => {
+                const letter = state.answers[position];
+                if (letter) {
+                    const pos = positions[position];
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('class', 'placed-letter');
+                    text.setAttribute('fill', '#12195c');
+                    text.setAttribute('font-family', 'Arial, sans-serif');
+                    text.setAttribute('font-size', '113.7');
+                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('x', pos.cx);
+                    text.setAttribute('y', pos.cy + 40);
+                    text.textContent = letter;
+                    svg.appendChild(text);
+                }
+            });
+        }
+
+        function updateSubmitButton() {
+            const allFilled = Object.values(state.answers).every(v => v !== null);
+            document.getElementById('submitBtn').disabled = !allFilled;
+        }
+
+        function setupButtons() {
+            document.getElementById('submitBtn').addEventListener('click', checkAnswers);
+            document.getElementById('resetBtn').addEventListener('click', reset);
+        }
+
+        function checkAnswers() {
+            const correct = Object.keys(correctAnswers).every(
+                key => state.answers[key] === correctAnswers[key]
+            );
+
+            const resultDiv = document.getElementById('resultMessage');
+            resultDiv.classList.remove('hidden', 'correct', 'incorrect');
+            
+            if (correct) {
+                resultDiv.classList.add('correct');
+                resultDiv.textContent = 'Correct! Well done!';
+            } else {
+                resultDiv.classList.add('incorrect');
+                resultDiv.textContent = 'Not quite, Try again, or press continue below to reveal the answer.';
+            }
+        }
+
+        function hideResult() {
+            document.getElementById('resultMessage').classList.add('hidden');
+        }
+
+        function reset() {
+            state.answers = {
+                topLeft: null,
+                topMiddle: null,
+                topRight: null,
+                bottomLeft: null
+            };
+            updateSVG();
+            renderLetters();
+            hideResult();
+        }
+
+        init();
+    </script>
+</body>
+</html>
