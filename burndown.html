@@ -45,7 +45,7 @@
             border: 1px solid #ddd;
         }
         th {
-            background-color: #4CAF50;
+            background-color: var(--darkBlue);
             color: white;
         }
         input {
@@ -57,7 +57,7 @@
         }
         input:focus {
             outline: none;
-            border-color: #4CAF50;
+            border-color: var(--teal);
         }
         #chartContainer {
             position: relative;
@@ -112,15 +112,15 @@
                 datasets: [{
                     label: 'Planned',
                     data: planned,
-                    borderColor: '#4CAF50',
-                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    borderColor: '#5DC8B9',
+                    backgroundColor: '#5DC8B930',
                     borderWidth: 2,
                     tension: 0.1
                 }, {
                     label: 'Actual',
                     data: actual,
-                    borderColor: '#2196F3',
-                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    borderColor: '#AF4510',
+                    backgroundColor: '#AF451030',
                     borderWidth: 2,
                     tension: 0.1
                 }]
