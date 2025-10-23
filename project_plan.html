@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
   <title>Critical Path Planner – POC</title>
   <style>
     @import "tailwindcss";
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+      font-family: "IBM Plex Sans", sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
@@ -15,6 +18,15 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+          --AIMblue: #4353A3;
+        --darkBlue: #38416D;
+        --teal: #5DC8B9;
+        --cream: #F1EEDE;
+        --grey: #e7e9ec;
+        --rust: #AF4510;
+        --navy: #12195C;
+        --white: #ffffff;
+        --lightBlue: #AEBAE4;
 }
 
 
@@ -45,7 +57,6 @@ h1 {
 
 /* Header */
 .header {
-  display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
@@ -334,14 +345,14 @@ h1 {
 .btn-primary {
   padding: 0.5rem 1rem;
   border-radius: 0.75rem;
-  background-color: #4f46e5;
+  background-color: var(--darkBlue);
   color: white;
   border: none;
   cursor: pointer;
 }
 
 .btn-primary:hover {
-  background-color: #4338ca;
+  background-color: var(--teal);
 }
 
 .btn-success {
@@ -517,9 +528,6 @@ h1 {
   margin-bottom: 0.75rem;
 }
 
-#project-name {
-  width: 250px;
-}
 
 .project-name-text {
   font-size: 1.25rem;
@@ -543,7 +551,7 @@ h1 {
 
 .project-name-input:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: var(--lightBlue);
   box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
 }
 
@@ -560,17 +568,19 @@ h1 {
 }
 
 .form-input {
-  width: 100%;
+  width: 80%;
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
+  background: var(--cream);
+  color: black !important;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--lightBlue);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
@@ -608,7 +618,7 @@ h1 {
 
 .task-id {
   font-weight: 600;
-  color: #4f46e5;
+  color: var(--AIMblue);
   min-width: 2rem;
 }
 
@@ -757,10 +767,23 @@ h1 {
     <div class="main-wrapper">
       <header class="header">
         <h1 class="header-title">Critical Path Planner – POC</h1>
-        <div class="stage-indicator">
+        <div class="instructions-text">
+         <p>Select a project from the below three options or create your own custom project.</p>
+<ul>
+  <li>Read the duration each task requires from the middle of the bar (e.g. dur 3 = 3 days duration).</li>
+  <li>Type in the ES as the day the task is expected to start. For the first task it will be 0.</li>
+  <li>Type in the EF by adding the number of days during the task is expected to take to the ES day. For the first task if the duration is 3 days the EF is 3.</li>
+  <li>Continue to fill in each bar then select Check ES/EF.</li>
+  <li>Once your ES/EF values are correct, enter the LS/LF values.</li>
+  <li>Input these from right to left to determine the latest possible start date for each task.</li>
+  <li>Continue to fill in each bar then select Check LS/LF.</li>
+  <li>Once LS/LF is correct, drag the bars to explore slack and critical path changes.</li>
+</ul>
+</div>
+        <!-- <div class="stage-indicator">
           <span class="stage-label">Stage:</span>
           <span class="stage-badge" id="stage-badge">Enter ES/EF</span>
-        </div>
+        </div> -->
       </header>
 
       <!-- Project selector -->
@@ -780,10 +803,11 @@ h1 {
           <!-- <label class="form-label">Project Name:</label>
           <input type="text" class="form-input" id="project-name" maxlength="30"> -->
         </div>
-
-        <div class="instructions-text">
-          1) Enter ES/EF in each bar, then check. 2) Enter LS/LF, then check. 3) Drag bars to explore slack & critical path changes.
+        <div class="stage-indicator">
+          <span class="stage-label">Stage:</span>
+          <span class="stage-badge" id="stage-badge">Enter ES/EF</span>
         </div>
+
       </section>
 
       <!-- Task management -->
@@ -935,7 +959,7 @@ h1 {
 const INITIAL_PROJECTS = [
   {
     id: "p1",
-    name: "House Painting Mini-Project",
+    name: "House Painting Mini Project",
     tasks: [
       { id: "A", name: "Prep walls", duration: 4, deps: [] },
       { id: "B", name: "Mask & cover", duration: 3, deps: ["A"] },
@@ -1148,26 +1172,15 @@ function renderProjectSelector() {
   const container = document.getElementById('project-buttons');
   container.innerHTML = '';
   
-  const customUnlocked = allDefaultInteractive();
-
   state.projects.forEach(p => {
     const btn = document.createElement('button');
     const isActive = state.currentProjectId === p.id;
     btn.className = `project-button ${isActive ? 'active' : ''}`;
-    const stageLabel = getProjectStage(p.id);
-    const subtitle = `${p.tasks.length} tasks • ${stageLabel === 'locked' ? 'Locked' : stageLabel}`;
+    // Remove subtitle, only show project name
     btn.innerHTML = `
       <div class="project-button-title">${p.name}</div>
-      <div class="project-button-subtitle">${subtitle}</div>
     `;
-    // Lock custom until default examples reached interactive
-    if (p.id === 'p_custom' && !customUnlocked) {
-      btn.disabled = true;
-      btn.title = 'Custom project locked until example projects reach Interactive stage';
-      btn.classList.add('project-button-locked');
-    } else {
-      btn.onclick = () => switchProject(p.id);
-    }
+    btn.onclick = () => switchProject(p.id);
     container.appendChild(btn);
   });
   
@@ -1195,6 +1208,12 @@ function renderProjectSelector() {
     projectNameContainer.appendChild(nameInput);
   }
   
+  // Show/hide stage indicator based on project type
+  const stageIndicator = document.querySelector('.stage-indicator');
+  if (stageIndicator) {
+    stageIndicator.style.display = isDefaultProject(state.currentProjectId) ? 'flex' : 'none';
+  }
+  
   // Show/hide task add section based on project type
   const taskAddSection = document.getElementById('taskAddSection');
   if (taskAddSection) {
@@ -1203,11 +1222,6 @@ function renderProjectSelector() {
 }
 
 function switchProject(projectId) {
-  // Prevent switching to locked custom project
-  if (projectId === 'p_custom' && !allDefaultInteractive()) {
-    alert('Custom project is locked until the three example projects reach Interactive stage.');
-    return;
-  }
   state.currentProjectId = projectId;
   resetProjectState();
   render();
@@ -1594,15 +1608,15 @@ function handleMouseMove(e) {
   // Get maximum EF of last tasks with new computation
   const newMaxEF = Math.max(...lastTasks.map(t => newComputed.EF[t.id]));
   
-  // Show warning if timeline extends
-  if (newMaxEF > originalMaxEF) {
-    if (!state.warningShown) { // Prevent multiple alerts
-      alert('Warning - this is extending the deadline of your project');
-      state.warningShown = true;
-    }
-  } else {
-    state.warningShown = false;
-  }
+  // // Show warning if timeline extends
+  // if (newMaxEF > originalMaxEF) {
+  //   if (!state.warningShown) { // Prevent multiple alerts
+  //     alert('Warning - this is extending the deadline of your project');
+  //     state.warningShown = true;
+  //   }
+  // } else {
+  //   state.warningShown = false;
+  // }
   
   // Update state and render
   state.minStart[state.dragging.id] = newStart;
@@ -1923,14 +1937,10 @@ document.addEventListener('DOMContentLoaded', () => {
   state.projects = JSON.parse(JSON.stringify(INITIAL_PROJECTS));
   state.currentProjectId = INITIAL_PROJECTS[0].id;
   
-  // initialize per-project stages: default examples start at 'esef', custom locked
+  // Initialize all projects including custom to 'esef' stage
   state.projectStages = {};
   state.projects.forEach(p => {
-    if (p.id === 'p_custom') {
-      state.projectStages[p.id] = 'locked';
-    } else {
-      state.projectStages[p.id] = 'esef';
-    }
+    state.projectStages[p.id] = 'esef';
   });
 
   // Initialize empty state objects
