@@ -71,7 +71,12 @@
 <body>
     <div class="container">
         <h1>Sprint Burndown Chart</h1>
-        
+        <p>You are project managing a sprint over ten days beginning on Monday the 1st of October.
+            You need to complete 10 tasks during this time. 
+            </p><p>
+            In the table below, the dates have been entered, and the 10 tasks your team needs to accomplish are listed in descending order as you 'burndown' the task list.
+            </p><p>
+            Use the inputs in the right hand column to input the actual task accomplishment data. The chart will update and create a real-time burndown chart.</p>
         <table>
             <thead>
                 <tr>
@@ -92,7 +97,7 @@
     <script>
         const dates = ['1-Oct', '2-Oct', '3-Oct', '4-Oct', '5-Oct', '6-Oct', '7-Oct', '8-Oct', '9-Oct', '10-Oct', '11-Oct', '12-Oct'];
         const planned = [10, 9, 8, 7, 6, 6, 6, 5, 4, 3, 2, 1];
-        const actual = [10, 10, 9, 6, 6, 6, 6, 5, 5, 4, 2, 1];
+        const actual = [];
 
         // Create table rows
         const tableBody = document.getElementById('dataTable');
@@ -101,7 +106,7 @@
             row.innerHTML = `
                 <td>${date}</td>
                 <td>${planned[index]}</td>
-                <td><input type="number" id="actual_${index}" value="${actual[index]}" min="0" step="1"></td>
+                <td><input type="number" id="actual_${index}" value="${actual[index]}" min="0" max="10" step="1"></td>
             `;
             tableBody.appendChild(row);
         });
