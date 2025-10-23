@@ -330,6 +330,32 @@
       transform: none;
     }
 
+    .show-answers-button {
+      background: var(--teal);
+      color: var(--darkBlue);
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: "IBM Plex Sans", sans-serif;
+      transition: all 0.3s ease;
+      display: none;
+      margin: 0;
+    }
+
+    .show-answers-button.visible {
+      display: block;
+    }
+
+    .show-answers-button:hover {
+      background: var(--darkBlue);
+      color: var(--white);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
     .feedback-overlay {
       position: fixed;
       top: 0;
@@ -417,14 +443,25 @@
       background: var(--darkBlue);
     }
 
-    .level-3-drop-zone.correct {
+    .level-3-drop-zone.correct,
+    .drop-zone.correct {
       border: 2px solid #4caf50;
       background: #e8f5e9;
+      position: relative;
     }
 
-    .level-3-drop-zone.incorrect {
+    .level-3-drop-zone.incorrect,
+    .drop-zone.incorrect {
       border: 2px solid #f44336;
       background: #ffebee;
+      position: relative;
+    }
+
+    .level-3-drop-zone.revealed,
+    .drop-zone.revealed {
+      border: 2px solid var(--darkBlue);
+      background: var(--white);
+      position: relative;
     }
 
     .owner-input.correct {
@@ -435,6 +472,44 @@
     .owner-input.incorrect {
       border: 2px solid #f44336;
       background: #ffebee;
+    }
+
+    .owner-input.revealed {
+      border: 2px solid var(--darkBlue);
+      background: var(--white);
+    }
+
+    .feedback-icon {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 1.5em;
+      font-weight: bold;
+      z-index: 10;
+    }
+
+    .feedback-icon.correct {
+      color: #4caf50;
+    }
+
+    .feedback-icon.revealed {
+      color: var(--darkBlue);
+    }
+
+    .score-banner {
+      background: var(--AIMblue);
+      color: var(--white);
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1.3em;
+      font-weight: 600;
+      margin: 20px 0;
+      display: none;
+    }
+
+    .score-banner.show {
+      display: block;
     }
   </style>
 </head>
@@ -506,7 +581,13 @@
           <strong>Instructions:</strong> Drag Level 2 phases to the top row, then drag Level 3 tasks to match their numbered slots. Fill in the work package owner at the bottom of each column.
         </div>
 
-        <button class="submit-button" onclick="checkAnswers()">Submit Answers</button>
+        <div style="display: flex; gap: 20px; justify-content: center; margin: 30px 0;">
+          <button class="submit-button" style="margin: 0;" onclick="checkAnswers()">Submit Answers</button>
+          <button class="show-answers-button" id="showAnswersBtn" onclick="showCorrectAnswers()">Show Answers</button>
+          <button class="submit-button" style="margin: 0; background: var(--rust);" onclick="resetForm()">Reset</button>
+        </div>
+
+        <div class="score-banner" id="scoreBanner"></div>
 
         <div class="wbs-grid">
           <!-- Column 1 -->
@@ -729,7 +810,6 @@
     function checkAnswers() {
       let totalQuestions = 0;
       let correctCount = 0;
-      let feedback = [];
 
       // Get all columns (first 3 only - not examples)
       const columns = document.querySelectorAll('.wbs-column');
@@ -746,66 +826,38 @@
         
         if (level2Text === correctAnswers.level2[colId]) {
           correctCount++;
-          feedback.push({
-            correct: true,
-            title: `Column ${i + 1} - Level 2 Phase`,
-            detail: `✓ Correct: "${level2Text}"`
-          });
-        } else if (level2Text === 'Drop Level 2 here' || !level2Text) {
-          feedback.push({
-            correct: false,
-            title: `Column ${i + 1} - Level 2 Phase`,
-            detail: `✗ No answer provided | Correct answer: "${correctAnswers.level2[colId]}"`
-          });
+          level2Zone.classList.add('correct');
+          level2Zone.classList.remove('incorrect');
+          addFeedbackIcon(level2Zone, true);
         } else {
-          feedback.push({
-            correct: false,
-            title: `Column ${i + 1} - Level 2 Phase`,
-            detail: `✗ Your answer: "${level2Text}" | Correct answer: "${correctAnswers.level2[colId]}"`
-          });
+          level2Zone.classList.add('incorrect');
+          level2Zone.classList.remove('correct');
+          addFeedbackIcon(level2Zone, false);
         }
 
         // Get the phase name for this column to check tasks against
         const phaseName = level2Text;
         const correctTasksForPhase = correctAnswers.level3Groups[phaseName] || [];
 
-        // Check Level 3 tasks - they just need to be in the right column, not specific slots
+        // Check Level 3 tasks
         const level3Zones = column.querySelectorAll('.level-3-drop-zone');
         level3Zones.forEach(zone => {
           const taskText = zone.textContent.trim();
           totalQuestions++;
           
-          // Skip if placeholder text
           if (taskText === 'Drop task here' || !taskText) {
-            feedback.push({
-              correct: false,
-              title: `Column ${i + 1} - Task`,
-              detail: `✗ No answer provided | This column should contain tasks from: ${phaseName}`
-            });
             zone.classList.add('incorrect');
+            zone.classList.remove('correct');
+            addFeedbackIcon(zone, false);
           } else if (correctTasksForPhase.includes(taskText)) {
             correctCount++;
-            feedback.push({
-              correct: true,
-              title: `Column ${i + 1} - "${taskText}"`,
-              detail: `✓ Correct: This task belongs in "${phaseName}"`
-            });
             zone.classList.add('correct');
+            zone.classList.remove('incorrect');
+            addFeedbackIcon(zone, true);
           } else {
-            // Find which phase this task actually belongs to
-            let correctPhase = '';
-            for (const [phase, tasks] of Object.entries(correctAnswers.level3Groups)) {
-              if (tasks.includes(taskText)) {
-                correctPhase = phase;
-                break;
-              }
-            }
-            feedback.push({
-              correct: false,
-              title: `Column ${i + 1} - "${taskText}"`,
-              detail: `✗ This task belongs in "${correctPhase}", not "${phaseName}"`
-            });
             zone.classList.add('incorrect');
+            zone.classList.remove('correct');
+            addFeedbackIcon(zone, false);
           }
         });
 
@@ -820,32 +872,106 @@
         );
         
         if (ownerValue === '') {
-          feedback.push({
-            correct: false,
-            title: `Column ${i + 1} - Work Package Owner`,
-            detail: `✗ No answer provided | Acceptable answers: ${acceptableAnswers.join(', ')}`
-          });
           ownerInput.classList.add('incorrect');
+          ownerInput.classList.remove('correct');
         } else if (isOwnerCorrect) {
           correctCount++;
-          feedback.push({
-            correct: true,
-            title: `Column ${i + 1} - Work Package Owner`,
-            detail: `✓ Correct: "${ownerValue}"`
-          });
           ownerInput.classList.add('correct');
+          ownerInput.classList.remove('incorrect');
         } else {
-          feedback.push({
-            correct: false,
-            title: `Column ${i + 1} - Work Package Owner`,
-            detail: `✗ Your answer: "${ownerValue}" | Acceptable answers: ${acceptableAnswers.join(', ')}`
-          });
           ownerInput.classList.add('incorrect');
+          ownerInput.classList.remove('correct');
         }
       }
 
-      // Display feedback
-      displayFeedback(correctCount, totalQuestions, feedback);
+      // Display score banner
+      const percentage = Math.round((correctCount / totalQuestions) * 100);
+      const scoreBanner = document.getElementById('scoreBanner');
+      scoreBanner.textContent = `Score: ${correctCount} / ${totalQuestions} correct (${percentage}%)`;
+      scoreBanner.classList.add('show');
+      
+      // Show the "Show Answers" button
+      document.getElementById('showAnswersBtn').classList.add('visible');
+      
+      // Scroll to top to see the score
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function addFeedbackIcon(element, isCorrect) {
+      // Remove any existing feedback icon
+      const existingIcon = element.querySelector('.feedback-icon');
+      if (existingIcon) {
+        existingIcon.remove();
+      }
+      
+      // Add new feedback icon
+      const icon = document.createElement('span');
+      icon.className = `feedback-icon ${isCorrect ? 'correct' : 'incorrect'}`;
+      icon.textContent = isCorrect ? '✓' : '✗';
+      element.style.position = 'relative';
+      element.appendChild(icon);
+    }
+
+    function showCorrectAnswers() {
+      const columns = document.querySelectorAll('.wbs-column');
+      
+      // Fill in correct answers for first 3 columns
+      for (let i = 0; i < 3; i++) {
+        const column = columns[i];
+        const colId = `col${i + 1}`;
+        
+        // Check Level 2 - only fill if incorrect or empty
+        const level2Zone = column.querySelector('.drop-zone.level-2-zone');
+        if (level2Zone.classList.contains('incorrect') || !level2Zone.classList.contains('filled')) {
+          const correctPhase = correctAnswers.level2[colId];
+          level2Zone.innerHTML = correctPhase;
+          level2Zone.classList.add('filled', 'revealed');
+          level2Zone.classList.remove('incorrect', 'correct');
+          addRevealedIcon(level2Zone);
+        }
+        
+        const correctPhase = correctAnswers.level2[colId];
+        const correctTasks = correctAnswers.level3Groups[correctPhase];
+        
+        // Check Level 3 tasks - only fill incorrect or empty ones
+        const level3Zones = column.querySelectorAll('.level-3-drop-zone');
+        let taskIndex = 0;
+        level3Zones.forEach(zone => {
+          if (zone.classList.contains('incorrect') || !zone.classList.contains('filled')) {
+            if (taskIndex < correctTasks.length) {
+              zone.textContent = correctTasks[taskIndex];
+              zone.classList.add('filled', 'revealed');
+              zone.classList.remove('incorrect', 'correct');
+              addRevealedIcon(zone);
+            }
+          }
+          taskIndex++;
+        });
+        
+        // Check Owner input - only fill if incorrect or empty
+        const ownerInput = column.querySelector('.owner-input');
+        if (ownerInput.classList.contains('incorrect') || ownerInput.value.trim() === '') {
+          const correctOwner = correctAnswers.owners[correctPhase][0]; // Use first acceptable answer
+          ownerInput.value = correctOwner;
+          ownerInput.classList.add('revealed');
+          ownerInput.classList.remove('incorrect', 'correct');
+        }
+      }
+    }
+
+    function addRevealedIcon(element) {
+      // Remove any existing feedback icon
+      const existingIcon = element.querySelector('.feedback-icon');
+      if (existingIcon) {
+        existingIcon.remove();
+      }
+      
+      // Add revealed icon (info symbol)
+      const icon = document.createElement('span');
+      icon.className = 'feedback-icon revealed';
+      icon.textContent = 'ℹ';
+      element.style.position = 'relative';
+      element.appendChild(icon);
     }
 
     function displayFeedback(correct, total, feedbackItems) {
@@ -877,6 +1003,114 @@
       document.querySelectorAll('.correct, .incorrect').forEach(el => {
         el.classList.remove('correct', 'incorrect');
       });
+      
+      // Remove feedback icons
+      document.querySelectorAll('.feedback-icon').forEach(icon => {
+        icon.remove();
+      });
+      
+      // Hide score banner
+      document.getElementById('scoreBanner').classList.remove('show');
+    }
+
+    function resetForm() {
+      // Remove all feedback first
+      document.querySelectorAll('.correct, .incorrect').forEach(el => {
+        el.classList.remove('correct', 'incorrect');
+      });
+      
+      // Remove feedback icons
+      document.querySelectorAll('.feedback-icon').forEach(icon => {
+        icon.remove();
+      });
+      
+      // Hide score banner and show answers button
+      document.getElementById('scoreBanner').classList.remove('show');
+      document.getElementById('showAnswersBtn').classList.remove('visible');
+      
+      // Reset all Level 2 zones
+      const level2Zones = document.querySelectorAll('.drop-zone.level-2-zone');
+      level2Zones.forEach(zone => {
+        zone.innerHTML = 'Drop Level 2 here';
+        zone.classList.remove('filled', 'correct', 'incorrect');
+      });
+
+      // Reset all Level 3 zones (only first 3 columns, not examples)
+      const columns = document.querySelectorAll('.wbs-column');
+      for (let i = 0; i < 3; i++) {
+        const level3Zones = columns[i].querySelectorAll('.level-3-drop-zone');
+        level3Zones.forEach(zone => {
+          zone.textContent = 'Drop task here';
+          zone.classList.remove('filled', 'correct', 'incorrect');
+        });
+      }
+
+      // Reset all owner inputs
+      const ownerInputs = document.querySelectorAll('.owner-input');
+      ownerInputs.forEach((input, index) => {
+        // Only reset first 3 columns (not example columns)
+        if (index < 3) {
+          input.value = '';
+          input.classList.remove('correct', 'incorrect');
+        }
+      });
+
+      // Restore draggable items to sidebar
+      const sourceItems = document.querySelector('.source-items');
+      sourceItems.innerHTML = `
+        <div class="source-title">Draggable Items</div>
+        
+        <div class="source-section">
+          <div class="source-section-title">Level 2 Phases</div>
+          <div class="wbs-box level-2 draggable-item" draggable="true" data-level="2">
+            Project Initiation
+          </div>
+          <div class="wbs-box level-2 draggable-item" draggable="true" data-level="2">
+            Planning
+          </div>
+          <div class="wbs-box level-2 draggable-item" draggable="true" data-level="2">
+            Design
+          </div>
+        </div>
+
+        <div class="source-section">
+          <div class="source-section-title">Level 3 Tasks</div>
+          
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Create wireframes
+          </div>
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Develop project plan
+          </div>
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Design UI/UX
+          </div>
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Define project scope
+          </div>
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Create schedule
+          </div>
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Approve design
+          </div>
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Define requirements
+          </div>
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Create project charter
+          </div>
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Identify stakeholders
+          </div>           
+          <div class="level-3-task draggable-item" draggable="true" data-level="3">
+            Resource planning
+          </div>
+        </div>
+      `;
+
+      // Reinitialize drag and drop
+      initDragAndDrop();
     }
 
     function initDragAndDrop() {
@@ -939,6 +1173,11 @@
         
         // Check if item level matches zone level
         if (draggedLevel === zoneLevel) {
+          // Check if zone is already filled
+          if (this.classList.contains('filled')) {
+            return false; // Don't allow drop if already filled
+          }
+          
           if (draggedLevel === '2') {
             // For level 2 items, replace the drop zone
             this.innerHTML = '';
