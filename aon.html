@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drag and Drop SVG Quiz</title>
     <style>
-            :root {
-        --AIMblue: #4353A3;
-        --darkBlue: #38416D;
-        --teal: #5DC8B9;
-        --cream: #F1EEDE;
-        --grey: #e7e9ec;
-        --rust: #AF4510;
-        --navy: #12195C;
-        --white: #ffffff;
-        --lightBlue: #AEBAE4;
-    }
+        :root {
+            --AIMblue: #4353A3;
+            --darkBlue: #38416D;
+            --teal: #5DC8B9;
+            --cream: #F1EEDE;
+            --grey: #e7e9ec;
+            --rust: #AF4510;
+            --navy: #12195C;
+            --white: #ffffff;
+            --lightBlue: #AEBAE4;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -23,7 +24,7 @@
         }
 
         body {
-      font-family: "IBM Plex Sans", sans-serif;
+            font-family: "IBM Plex Sans", sans-serif;
             min-height: 90vh;
             display: flex;
             align-items: center;
@@ -37,7 +38,6 @@
             padding: 40px;
             max-width: 1200px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
         h1 {
@@ -153,6 +153,15 @@
             background: #cbd5e0;
         }
 
+        .show-answer-btn {
+            background: var(--rust);
+            color: white;
+        }
+
+        .show-answer-btn:hover {
+            background: #8f3709;
+        }
+
         .result-message {
             text-align: center;
             padding: 20px;
@@ -245,6 +254,7 @@
         <div class="button-container">
             <button class="submit-btn" id="submitBtn" disabled>Submit Answer</button>
             <button class="reset-btn" id="resetBtn">Reset</button>
+            <button class="show-answer-btn hidden" id="showAnswerBtn">Show Answer</button>
         </div>
 
         <div id="resultMessage" class="result-message hidden"></div>
@@ -383,6 +393,7 @@
         function setupButtons() {
             document.getElementById('submitBtn').addEventListener('click', checkAnswers);
             document.getElementById('resetBtn').addEventListener('click', reset);
+            document.getElementById('showAnswerBtn').addEventListener('click', showAnswer);
         }
 
         function checkAnswers() {
@@ -391,19 +402,36 @@
             );
 
             const resultDiv = document.getElementById('resultMessage');
+            const showAnswerBtn = document.getElementById('showAnswerBtn');
             resultDiv.classList.remove('hidden', 'correct', 'incorrect');
             
             if (correct) {
                 resultDiv.classList.add('correct');
                 resultDiv.textContent = 'Correct! Well done!';
+                showAnswerBtn.classList.add('hidden');
             } else {
                 resultDiv.classList.add('incorrect');
                 resultDiv.textContent = 'Not quite, Try again, or press continue below to reveal the answer.';
+                showAnswerBtn.classList.remove('hidden');
             }
+        }
+
+        function showAnswer() {
+            state.answers = { ...correctAnswers };
+            updateSVG();
+            renderLetters();
+            
+            const resultDiv = document.getElementById('resultMessage');
+            resultDiv.classList.remove('incorrect');
+            resultDiv.classList.add('correct');
+            resultDiv.textContent = 'Here is the correct answer!';
+            
+            document.getElementById('showAnswerBtn').classList.add('hidden');
         }
 
         function hideResult() {
             document.getElementById('resultMessage').classList.add('hidden');
+            document.getElementById('showAnswerBtn').classList.add('hidden');
         }
 
         function reset() {
