@@ -122,12 +122,12 @@
     .task-row {
       position: absolute;
       left: 0;
-      height: 110px;
+      height: 130px;
     }
 
     .task-bar {
       position: relative;
-      height: 80px;
+      height: 110px;
       border-radius: 0.75rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       display: flex;
@@ -135,6 +135,7 @@
       justify-content: center;
       cursor: grab;
       transition: transform 0.1s;
+      min-width: 100px !important;
     }
 
     .task-bar:active {
@@ -292,7 +293,7 @@
           { id: "B", name: "Design", duration: 4, deps: ["A"] },
           { id: "C", name: "Content", duration: 3, deps: ["A"] },
           { id: "D", name: "Development", duration: 5, deps: ["B", "C"] },
-          { id: "E", name: "Testing", duration: 2, deps: ["D"] }
+          { id: "E", name: "Testing", duration: 3, deps: ["D"] }
         ]
       },
       {
@@ -314,7 +315,7 @@
           { id: "B", name: "Prototype", duration: 5, deps: ["A"] },
           { id: "C", name: "Marketing", duration: 3, deps: ["A"] },
           { id: "D", name: "Production", duration: 4, deps: ["B"] },
-          { id: "E", name: "Launch", duration: 2, deps: ["C", "D"] }
+          { id: "E", name: "Launch", duration: 3, deps: ["C", "D"] }
         ]
       }
     ];
@@ -424,7 +425,7 @@
       const chartArea = document.getElementById('chart-area');
       
       container.innerHTML = '';
-      chartArea.style.height = (project.tasks.length * 110 + 20) + 'px';
+      chartArea.style.height = (project.tasks.length * 120 + 50) + 'px';
 
       const chartWidth = document.getElementById('scale-header').offsetWidth;
       state.unitWidth = chartWidth / (maxTime + 1);
@@ -435,7 +436,7 @@
 
         const row = document.createElement('div');
         row.className = 'task-row';
-        row.style.top = (idx * 110) + 'px';
+        row.style.top = (idx * 120) + 'px';
 
         const bar = document.createElement('div');
         bar.className = `task-bar ${isCritical ? 'critical' : 'non-critical'}`;
@@ -464,7 +465,7 @@
       const svg = document.getElementById('arrows-svg');
       const paths = document.getElementById('arrow-paths');
       const chartWidth = 24 + (maxTime + 1) * state.unitWidth;
-      const chartHeight = project.tasks.length * 110 + 20;
+      const chartHeight = project.tasks.length * 120 + 20;
 
       svg.setAttribute('viewBox', `0 0 ${chartWidth} ${chartHeight}`);
       paths.innerHTML = '';
@@ -558,6 +559,53 @@
           render();
         };
         container.appendChild(btn);
+      });
+    }
+
+    
+    function renderArrows(project, computed, maxTime) {
+      const svg = document.getElementById('arrows-svg');
+      const paths = document.getElementById('arrow-paths');
+      const chartWidth = 24 + (maxTime + 1) * state.unitWidth;
+      const chartHeight = project.tasks.length * 120 + 20;
+
+      svg.setAttribute('viewBox', `0 0 ${chartWidth} ${chartHeight}`);
+      paths.innerHTML = '';
+
+      project.tasks.forEach((task, tgtIdx) => {
+        const tgtStart = state.minStart[task.id] ?? computed.ES[task.id];
+        const tgtX = 24 + tgtStart * state.unitWidth;
+        const tgtY = tgtIdx * 110 + 40;
+
+        task.deps.forEach(depId => {
+          const pred = project.tasks.find(t => t.id === depId);
+          if (!pred) return;
+
+          const predIdx = project.tasks.indexOf(pred);
+          const predStart = state.minStart[pred.id] ?? computed.ES[pred.id];
+          const predEnd = predStart + pred.duration;
+          const predEndX = 24 + predEnd * state.unitWidth;
+          const predY = predIdx * 110 + 40;
+
+          const gap = tgtStart - predEnd;
+          const hasGap = gap >= 1;
+
+          const midX = (predEndX + tgtX) / 2;
+          const isCritLink = computed.critical.has(depId) && computed.critical.has(task.id);
+          
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', `M ${predEndX} ${predY} H ${midX} V ${tgtY} H ${tgtX}`);
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke', isCritLink ? '#ef4444' : '#9ca3af');
+          path.setAttribute('stroke-width', '2');
+          
+          // Only add arrowhead if there's at least 1 day gap
+          if (hasGap) {
+            path.setAttribute('marker-end', isCritLink ? 'url(#arrow-red)' : 'url(#arrow-gray)');
+          }
+          
+          paths.appendChild(path);
+        });
       });
     }
 
