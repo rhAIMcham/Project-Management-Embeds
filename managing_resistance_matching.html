@@ -163,41 +163,36 @@
       <div class="dragItems">
         <div class="column-header">Draggable Items</div>
         <div class="cards-container" data-column="dragItems">
-            <div class="card" id="s1" draggable="true">
-                <p>Team members require daily communication from you and with each other.</p>
+            <div class="card" id="r1" draggable="true">
+                <p>Management have told you two major stakeholders are against the project before it has begun.</p>
             </div>
-            <div class="card"  id="s2" draggable="true">
-                <p>Executives require monthly status reports.</p>
+            <div class="card"  id="r2" draggable="true">
+                <p>A team member is expressing scepticism the project will succeed because they were in a previously unsuccessful project.</p>
             </div>
-            <div class="card"  id="s3" draggable="true">
-                <p>Employees require explanations of how and when the move will affect them.</p>
+            <div class="card"  id="r3" draggable="true">
+                <p>Rumours have spread about the project which has now created panic.</p>
             </div>
-            <div class="card"  id="s4" draggable="true">
-                <p>Building manager requires information about safety code compliance</p>
+
+            <div class="card" id="m1" draggable="true">
+                <p>Early engagement. The earlier stakeholders are involved, the less likely they are to resist.</p>
             </div>
-            <div class="card" id="c1" draggable="true">
-                <p>Microsoft Teams and Kanban board tracking task completion.</p>
+            <div class="card"  id="m2" draggable="true">
+                <p>Incremental wins. Delivering small, visible benefits early can reduce scepticism.</p>
             </div>
-            <div class="card"  id="c2" draggable="true">
-                <p>Dashboard summaries emailed before review meetings.</p>
-            </div>
-            <div class="card"  id="c3" draggable="true">
-                <p>Q&A sessions and fortnightly newsletters.</p>
-            </div>
-            <div class="card"  id="c4" draggable="true">
-                <p>Formal reports confirming compliance.</p>
+            <div class="card"  id="m3" draggable="true">
+                <p>Transparency and communication: Addresses misunderstandings and prevents rumours from filling the gaps.</p>
             </div>
         </div>
       </div>
 
       <div class="column">
-        <div class="column-header">Stakeholder group</div>
-        <div class="cards-container" data-column="stakeholderGroup"></div>
+        <div class="column-header">Resistance scenario</div>
+        <div class="cards-container" data-column="resistanceScenario"></div>
       </div>
 
       <div class="column">
-        <div class="column-header">Communication tools</div>
-        <div class="cards-container" data-column="commsTools"></div>
+        <div class="column-header">Management techniques</div>
+        <div class="cards-container" data-column="managementTechniques"></div>
       </div>
     </div>
     <button onclick="checkAnswers()" id="submitBtn" disabled>Submit</button>
@@ -287,22 +282,22 @@
     function checkAnswers() {
       // Define correct answers
       const correctAnswers = {
-        stakeholderGroup: ['s1', 's2', 's3', 's4'],
-        commsTools: ['c1', 'c2', 'c3', 'c4']
+        resistanceScenario: ['r1', 'r2', 'r3'],
+        managementTechniques: ['m1', 'm2', 'm3']
       };
 
       let allCorrect = true;
       let results = {
-        stakeholderGroup: { correct: 0, total: 4 },
-        commsTools: { correct: 0, total: 4 }
+        resistanceScenario: { correct: 0, total: 3 },
+        managementTechniques: { correct: 0, total: 3 }
       };
 
-      // Check stakeholder group column
-      const stakeholderContainer = document.querySelector('[data-column="stakeholderGroup"]');
-      const stakeholderCards = stakeholderContainer.querySelectorAll('.card');
-      stakeholderCards.forEach(card => {
-        if (correctAnswers.stakeholderGroup.includes(card.id)) {
-          results.stakeholderGroup.correct++;
+      // Check resistanceScenario group column
+      const resistanceScenarioContainer = document.querySelector('[data-column="resistanceScenario"]');
+      const resistanceScenarioCards = resistanceScenarioContainer.querySelectorAll('.card');
+      resistanceScenarioCards.forEach(card => {
+        if (correctAnswers.resistanceScenario.includes(card.id)) {
+          results.resistanceScenario.correct++;
           card.style.border = '3px solid #0f7c2e';
         } else {
           allCorrect = false;
@@ -311,11 +306,11 @@
       });
 
       // Check communication tools column
-      const commsContainer = document.querySelector('[data-column="commsTools"]');
-      const commsCards = commsContainer.querySelectorAll('.card');
-      commsCards.forEach(card => {
-        if (correctAnswers.commsTools.includes(card.id)) {
-          results.commsTools.correct++;
+      const managementTechniquesContainer = document.querySelector('[data-column="managementTechniques"]');
+      const managementTechniquesCards = managementTechniquesContainer.querySelectorAll('.card');
+      managementTechniquesCards.forEach(card => {
+        if (correctAnswers.managementTechniques.includes(card.id)) {
+          results.managementTechniques.correct++;
           card.style.border = '3px solid #0f7c2e';
         } else {
           allCorrect = false;
@@ -324,12 +319,12 @@
       });
 
       // Display results
-      if (allCorrect && stakeholderCards.length === 4 && commsCards.length === 4) {
+      if (allCorrect && resistanceScenarioCards.length === 3 && managementTechniquesCards.length === 3) {
         alert('🎉 Perfect! All cards are in the correct columns!');
       } else {
         let message = 'Results:\n\n';
-        message += `Stakeholder Group: ${results.stakeholderGroup.correct}/${results.stakeholderGroup.total} correct\n`;
-        message += `Communication Tools: ${results.commsTools.correct}/${results.commsTools.total} correct\n\n`;
+        message += `Stakeholder Group: ${results.resistanceScenario.correct}/${results.resistanceScenario.total} correct\n`;
+        message += `Communication Tools: ${results.managementTechniques.correct}/${results.managementTechniques.total} correct\n\n`;
         message += 'Green border = correct, Red border = incorrect';
         alert(message);
       }
