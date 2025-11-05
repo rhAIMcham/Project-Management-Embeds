@@ -7,4 +7,223 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
-  
+  <style>
+    *, *::before, *::after {
+    box-sizing: border-box;
+    font-family: "IBM Plex Sans", sans-serif;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    background-color: #333;
+}
+
+.container {
+    width: 800px;
+    max-width: 80%;
+    background-color: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px 2px;
+
+}
+
+.btn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    background-color: black;
+    border: 1px solid green;
+    border-radius: 5px;
+    padding: 5px 20px;
+    color: white;
+    outline: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    border-color: black;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div id="text">Text</div>
+    <div id="option-buttons" class="btn-grid">
+        <button class="btn">Option 1</button>
+        <button class="btn">Option 2</button>
+        <button class="btn">Option 3</button>
+        <button class="btn">Option 4</button>
+    </div>
+</div>
+</body>
+<script>
+    const textElement = document.getElementById('text')
+const optionButtonsElement = document.getElementById('option-buttons')
+
+let state = {}
+
+function startGame() {
+    state = {}
+    showTextNode(1)
+}
+
+function showTextNode(textNodeIndex) {
+    const textNode = textNodes.find(textNode => textNode.id === textNodeIndex)
+    textElement.innerText = textNode.text
+    while (optionButtonsElement.firstChild) {
+        optionButtonsElement.removeChild(optionButtonsElement.firstChild)
+    }
+
+    textNode.options.forEach(option => {
+        if (showOption(option)) {
+            const button = document.createElement('button')
+            button.innerText = option.text
+            button.classList.add('btn')
+            button.addEventListener('click', () => selectOption(option))
+            optionButtonsElement.appendChild(button)
+        }
+    })
+}
+
+
+function showOption(option) {
+    return option.requiredState == null || option.requiredState(state)
+}
+
+function selectOption(option){
+    const nextTextNodeId = typeof option.nextText === "function"
+    ? option.nextText()
+    : option.nextText;
+
+    if (nextTextNodeId <= 0) {
+        return startGame();
+    }
+    state = Object.assign(state, option.setState)
+    showTextNode(nextTextNodeId);
+}
+
+const textNodes = [
+    {
+        id: 1,
+        text: 'Someone has stolen your customised office chair. You ordered it specially to accomodate your lower back injury and need it to work safely and comfortably. You can...',
+        options: [
+            {
+                text: 'Politely ask why they took your chair specifically, and see if your office manager can source a second one for them.',
+                nextText: () => [2, 3, 4][Math.floor(Math.random() * 3)]
+            },
+            {
+                text: 'Steal the chair back when they are in the bathroom.',
+                nextText: () => [5, 6, 7][Math.floor(Math.random() * 3)]
+            },
+            {
+                text: 'Spread malicious gossip about them to your coworkers and hope they quit.',
+                nextText: () => [8, 9, 10][Math.floor(Math.random() * 3)]
+            },
+        ]
+    },
+    {
+        id: 2,
+        text: 'They are embarrassed and did not realise you had a specialised chair. They return it and wait for the new one for them to arrive.',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    },
+    {
+        id: 3,
+        text: 'They begrudgingly return it, but you can tell they are not happy you complained.',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    },
+    {
+        id: 4,
+        text: 'They deny any knowledge of your chair. They claim it was always their chair, and that you are creating a problem out of nothing.',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    },
+    {
+        id: 5,
+        text: 'They return from the bathroom and are perplexed, but take another unremarkable chair from an empty desk and continue working.',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    },
+    {
+        id: 6,
+        text: 'They return from the bathroom and approach your desk, asking if there is a specific reason you always get the best chair, despite other chairs being more ‘up for grabs’.',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    },
+    {
+        id: 7,
+        text: 'They return from the bathroom and look visibly annoyed. They use another chair and a new email is in your inbox immediately, manager ccd in.',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    },
+    {
+        id: 8,
+        text: 'The chair thief seems completely oblivious to their new status as office pariah. They are still using your chair.',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    },
+    {
+        id: 9,
+        text: 'The chair thief has had a meeting with your manager. After the meeting concludes, you hear they were given a warning by HR but your chair has not been returned yet. ',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    },
+    {
+        id: 10,
+        text: 'Your other coworkers are completely unimpressed by your gossip, and see you as untrustworthy and irritating.',
+        options: [
+            {
+                text: 'Restart',
+                nextText: -1
+            }
+        ]
+    }
+]
+
+startGame()
+</script>
+</html>
