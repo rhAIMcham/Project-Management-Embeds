@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trello-Style Board</title>
+    <style>
+            :root {
+        --AIMblue: #4353A3;
+        --darkBlue: #38416D;
+        --teal: #5DC8B9;
+        --cream: #F1EEDE;
+        --grey: #e7e9ec;
+        --rust: #AF4510;
+        --navy: #12195C;
+        --white: #ffffff;
+        --lightBlue: #AEBAE4;
+    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+      font-family: "IBM Plex Sans", sans-serif;
+            min-height: 90vh;
+   padding: 30px 20px;
+        }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: var(--darkBlue);
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2em;
+      font-weight: 600;
+    }
+
+    .board {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 20px;
+      justify-content: space-around;
+    }
+
+    .column {
+ background: linear-gradient(1deg,rgba(67, 83, 163, 0.5) 0%, rgba(174, 186, 228, 0.57) 100%);  border-radius: 8px;
+      padding: 12px;
+      min-width: 320px;
+      max-width: 320px;
+      flex-shrink: 0;
+      height: fit-content;
+    }
+    .dragItems {
+            width: 350px;
+    background: rgb(206, 206, 206);
+    padding: 20px;
+    border-radius: 8px;
+    height: fit-content;
+    }
+
+    .column-header {
+      font-weight: 600;
+      font-size: 1.1em;
+      color: #172b4d;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+    }
+
+    .cards-container {
+      min-height: 100px;
+      padding: 4px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 10px;
+      cursor: move;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+
+    .card.dragging {
+      opacity: 0.5;
+      transform: rotate(3deg);
+    }
+
+    .cards-container.drag-over {
+      background: #d5dce4;
+      border-radius: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85em;
+      font-weight: 600;
+      color: #5e6c84;
+      margin-bottom: 4px;
+    }
+
+    select, input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 2px solid #dfe1e6;
+      border-radius: 4px;
+      font-size: 0.95em;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: #0079bf;
+    }
+
+    .add-card-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: #5e6c84;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.95em;
+      text-align: left;
+      transition: background 0.2s;
+    }
+
+    .add-card-btn:hover {
+      background: #d5dce4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sorting</h1>
+    
+    <div class="board">
+      <div class="dragItems">
+        <div class="column-header">Draggable Items</div>
+        <div class="cards-container" data-column="dragItems">
+            <div class="card" id="s1" draggable="true">
+                <p>Team members require daily communication from you and with each other.</p>
+            </div>
+            <div class="card"  id="s2" draggable="true">
+                <p>Executives require monthly status reports.</p>
+            </div>
+            <div class="card"  id="s3" draggable="true">
+                <p>Employees require explanations of how and when the move will affect them.</p>
+            </div>
+            <div class="card"  id="s4" draggable="true">
+                <p>Building manager requires information about safety code compliance</p>
+            </div>
+            <div class="card" id="c1" draggable="true">
+                <p>Microsoft Teams and Kanban board tracking task completion.</p>
+            </div>
+            <div class="card"  id="c2" draggable="true">
+                <p>Dashboard summaries emailed before review meetings..</p>
+            </div>
+            <div class="card"  id="c3" draggable="true">
+                <p>Q&A sessions and fortnightly newsletters.</p>
+            </div>
+            <div class="card"  id="c4" draggable="true">
+                <p>Formal reports confirming compliance.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="column-header">Stakeholder group</div>
+        <div class="cards-container" data-column="stakeholderGroup"></div>
+      </div>
+
+      <div class="column">
+        <div class="column-header">Communication tools</div>
+        <div class="cards-container" data-column="commsTools"></div>
+      </div>
+    </div>
+    <button onclick="checkAnswers()" id="submitBtn" disabled>Submit</button>
+  </div>
+
+   <script>
+    let draggedCard = null;
+
+    function initDragAndDrop() {
+      const cards = document.querySelectorAll('.card');
+      const containers = document.querySelectorAll('.cards-container');
+
+      cards.forEach(card => {
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+      });
+
+      containers.forEach(container => {
+        container.addEventListener('dragover', handleDragOver);
+        container.addEventListener('drop', handleDrop);
+        container.addEventListener('dragleave', handleDragLeave);
+        container.addEventListener('dragenter', handleDragEnter);
+      });
+    }
+
+    function handleDragStart(e) {
+      draggedCard = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+      this.classList.remove('dragging');
+      document.querySelectorAll('.cards-container').forEach(container => {
+        container.classList.remove('drag-over');
+      });
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      if (e.target.classList.contains('cards-container')) {
+        e.target.classList.add('drag-over');
+      }
+    }
+
+    function handleDragLeave(e) {
+      if (e.target.classList.contains('cards-container')) {
+        e.target.classList.remove('drag-over');
+      }
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      let dropZone = e.target;
+      if (!dropZone.classList.contains('cards-container')) {
+        dropZone = dropZone.closest('.cards-container');
+      }
+      
+      if (dropZone && draggedCard) {
+        dropZone.classList.remove('drag-over');
+        dropZone.appendChild(draggedCard);
+        checkIfAllDragged();
+      }
+      
+      return false;
+    }
+
+    function checkIfAllDragged() {
+      const dragItemsContainer = document.querySelector('[data-column="dragItems"]');
+      const remainingCards = dragItemsContainer.querySelectorAll('.card');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      if (remainingCards.length === 0) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+      }
+    }
+
+    function checkAnswers() {
+      // Define correct answers
+      const correctAnswers = {
+        stakeholderGroup: ['s1', 's2', 's3', 's4'],
+        commsTools: ['c1', 'c2', 'c3', 'c4']
+      };
+
+      let allCorrect = true;
+      let results = {
+        stakeholderGroup: { correct: 0, total: 4 },
+        commsTools: { correct: 0, total: 4 }
+      };
+
+      // Check stakeholder group column
+      const stakeholderContainer = document.querySelector('[data-column="stakeholderGroup"]');
+      const stakeholderCards = stakeholderContainer.querySelectorAll('.card');
+      stakeholderCards.forEach(card => {
+        if (correctAnswers.stakeholderGroup.includes(card.id)) {
+          results.stakeholderGroup.correct++;
+          card.style.border = '3px solid #0f7c2e';
+        } else {
+          allCorrect = false;
+          card.style.border = '3px solid #d32f2f';
+        }
+      });
+
+      // Check communication tools column
+      const commsContainer = document.querySelector('[data-column="commsTools"]');
+      const commsCards = commsContainer.querySelectorAll('.card');
+      commsCards.forEach(card => {
+        if (correctAnswers.commsTools.includes(card.id)) {
+          results.commsTools.correct++;
+          card.style.border = '3px solid #0f7c2e';
+        } else {
+          allCorrect = false;
+          card.style.border = '3px solid #d32f2f';
+        }
+      });
+
+      // Display results
+      if (allCorrect && stakeholderCards.length === 4 && commsCards.length === 4) {
+        alert('🎉 Perfect! All cards are in the correct columns!');
+      } else {
+        let message = 'Results:\n\n';
+        message += `Stakeholder Group: ${results.stakeholderGroup.correct}/${results.stakeholderGroup.total} correct\n`;
+        message += `Communication Tools: ${results.commsTools.correct}/${results.commsTools.total} correct\n\n`;
+        message += 'Green border = correct, Red border = incorrect';
+        alert(message);
+      }
+    }
+
+    // Initialize on page load
+    initDragAndDrop();
+  </script>
+</body>
+</html>
