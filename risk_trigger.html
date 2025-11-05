@@ -163,36 +163,36 @@
       <div class="dragItems">
         <div class="column-header">Draggable Items</div>
         <div class="cards-container" data-column="dragItems">
-            <div class="card" id="r1" draggable="true">
-                <p>Management have told you two major stakeholders are against the project before it has begun.</p>
+            <div class="card" id="l1" draggable="true">
+                <p>Delivery of key materials is more than 5 days late.</p>
             </div>
-            <div class="card"  id="r2" draggable="true">
-                <p>A team member is expressing scepticism the project will succeed because they were in a previously unsuccessful project.</p>
+            <div class="card"  id="l2" draggable="true">
+                <p>A vendor invoice exceeds the budgeted amount by 10%.</p>
             </div>
-            <div class="card"  id="r3" draggable="true">
-                <p>Rumours have spread about the project which has now created panic.</p>
+            <div class="card"  id="l3" draggable="true">
+                <p>Resignation notice from a senior team member.</p>
             </div>
 
-            <div class="card" id="m1" draggable="true">
-                <p>Early engagement. The earlier stakeholders are involved, the less likely they are to resist.</p>
+            <div class="card" id="r1" draggable="true">
+                <p>Stakeholders decline or appear disengaged during meetings.</p>
             </div>
-            <div class="card"  id="m2" draggable="true">
-                <p>Incremental wins. Delivering small, visible benefits early can reduce scepticism.</p>
+            <div class="card"  id="r2" draggable="true">
+                <p>Reducing work quality and missed deadlines due to declining team morale.</p>
             </div>
-            <div class="card"  id="m3" draggable="true">
-                <p>Transparency and communication: Addresses misunderstandings and prevents rumours from filling the gaps.</p>
+            <div class="card"  id="r3" draggable="true">
+                <p>Delays in decision-making and missed milestones due to communication breakdowns.</p>
             </div>
         </div>
       </div>
 
       <div class="column">
-        <div class="column-header">Resistance scenario</div>
-        <div class="cards-container" data-column="resistanceScenario"></div>
+        <div class="column-header">Risk trigger answers</div>
+        <div class="cards-container" data-column="leftCol"></div>
       </div>
 
       <div class="column">
-        <div class="column-header">Management techniques</div>
-        <div class="cards-container" data-column="managementTechniques"></div>
+        <div class="column-header">Early warning signs answer</div>
+        <div class="cards-container" data-column="rightCol"></div>
       </div>
     </div>
     <button onclick="checkAnswers()" id="submitBtn" disabled>Submit</button>
@@ -282,22 +282,22 @@
     function checkAnswers() {
       // Define correct answers
       const correctAnswers = {
-        resistanceScenario: ['r1', 'r2', 'r3'],
-        managementTechniques: ['m1', 'm2', 'm3']
+        leftColumn: ['l1', 'l2', 'l3'],
+        rightColumn: ['r1', 'r2', 'r3']
       };
 
       let allCorrect = true;
       let results = {
-        resistanceScenario: { correct: 0, total: 3 },
-        managementTechniques: { correct: 0, total: 3 }
+        leftColumn: { correct: 0, total: 3 },
+        rightColumn: { correct: 0, total: 3 }
       };
 
       // Check resistanceScenario group column
-      const resistanceScenarioContainer = document.querySelector('[data-column="resistanceScenario"]');
-      const resistanceScenarioCards = resistanceScenarioContainer.querySelectorAll('.card');
-      resistanceScenarioCards.forEach(card => {
-        if (correctAnswers.resistanceScenario.includes(card.id)) {
-          results.resistanceScenario.correct++;
+      const leftContainer = document.querySelector('[data-column="leftCol"]');
+      const leftCards = leftContainer.querySelectorAll('.card');
+      leftCards.forEach(card => {
+        if (correctAnswers.leftCol.includes(card.id)) {
+          results.leftCol.correct++;
           card.style.border = '3px solid #0f7c2e';
         } else {
           allCorrect = false;
@@ -306,11 +306,11 @@
       });
 
       // Check communication tools column
-      const managementTechniquesContainer = document.querySelector('[data-column="managementTechniques"]');
-      const managementTechniquesCards = managementTechniquesContainer.querySelectorAll('.card');
-      managementTechniquesCards.forEach(card => {
-        if (correctAnswers.managementTechniques.includes(card.id)) {
-          results.managementTechniques.correct++;
+      const rightContainer = document.querySelector('[data-column="rightCol"]');
+      const rightCards = rightContainer.querySelectorAll('.card');
+      rightCards.forEach(card => {
+        if (correctAnswers.rightCol.includes(card.id)) {
+          results.rightCol.correct++;
           card.style.border = '3px solid #0f7c2e';
         } else {
           allCorrect = false;
@@ -319,12 +319,12 @@
       });
 
       // Display results
-      if (allCorrect && resistanceScenarioCards.length === 3 && managementTechniquesCards.length === 3) {
+      if (allCorrect && leftCards.length === 3 && rightCards.length === 3) {
         alert('🎉 Perfect! All cards are in the correct columns!');
       } else {
         let message = 'Results:\n\n';
-        message += `Stakeholder Group: ${results.resistanceScenario.correct}/${results.resistanceScenario.total} correct\n`;
-        message += `Communication Tools: ${results.managementTechniques.correct}/${results.managementTechniques.total} correct\n\n`;
+        message += `Risk trigger answers: ${results.leftCol.correct}/${results.leftCol.total} correct\n`;
+        message += `Early warning signs answer: ${results.rightCol.correct}/${results.rightCol.total} correct\n\n`;
         message += 'Green border = correct, Red border = incorrect';
         alert(message);
       }
