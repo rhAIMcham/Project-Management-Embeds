@@ -43,7 +43,7 @@
             background: #f8f9fa;
             padding: 15px;
             border-radius: 8px;
-            max-height: 500px;
+
             overflow-y: auto;
         }
         .risk-list h2 { color: #333; margin-bottom: 12px; font-size: 18px; }
@@ -126,6 +126,7 @@
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
+            transition: opacity 0.3s ease;
         }
         .actions-section h2 { color: #333; margin-bottom: 8px; font-size: 20px; }
         .actions-subtitle { color: #666; margin-bottom: 15px; font-size: 14px; }
@@ -169,20 +170,25 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏗️ Construction Risk Matrix Training</h1>
-        <p class="subtitle">Apartment Building Construction Project</p>
+        <h1>Risk matrix and management</h1>
+        <p class="subtitle">Home renovation project</p>
         <div class="round-indicator" id="roundIndicator">Phase 1 of 3 - Month 1</div>
         <div class="instructions">
-            <h3>📋 Instructions</h3>
+            <h3>Instructions</h3>
             <p>Review the project risks below and place each risk in the appropriate cell of the risk matrix by typing the Risk ID (e.g., R1, R2) into the matrix cells. Then, select <strong>2 actions</strong> from the available options to manage these risks. Your choices will impact the project's trajectory!</p>
         </div>
         <div class="content-grid">
             <div class="risk-list">
-                <h2>📊 Project Risks</h2>
+                <h2>Project Risks</h2>
                 <div id="risksList"></div>
+                        <div class="actions-section">
+            <h2>Risk Management Actions</h2>
+            <p class="actions-subtitle">Select <strong>2 actions</strong> to help control project risks:</p>
+            <div id="actionsList"></div>
+        </div>
             </div>
             <div class="matrix-container">
-                <h2>🎯 Risk Matrix</h2>
+                <h2>Risk Matrix</h2>
                 <div id="hot-container"></div>
                 <div class="legend">
                     <div class="legend-item">
@@ -204,11 +210,7 @@
                 </div>
             </div>
         </div>
-        <div class="actions-section">
-            <h2>🎬 Risk Management Actions</h2>
-            <p class="actions-subtitle">Select <strong>2 actions</strong> to help control project risks:</p>
-            <div id="actionsList"></div>
-        </div>
+
         <div class="controls">
             <button id="submitBtn" onclick="submitAssessment()">Submit Assessment</button>
             <button onclick="resetMatrix()" style="background: #6c757d; margin-left: 10px;">Reset Matrix</button>
@@ -217,7 +219,7 @@
     </div>
     <script>
         const phase1Risks = [
-            { id: 'R1', description: 'Permit approval delays from city planning', correct: [2, 2] },
+            { id: 'R1', description: 'Permit approval delays from city planning', correct: [0, 0] },
             { id: 'R2', description: 'Inadequate site investigation for soil conditions', correct: [1, 3] },
             { id: 'R3', description: 'Key subcontractor not yet secured', correct: [3, 2] },
             { id: 'R4', description: 'Minor equipment rental availability issues', correct: [3, 1] },
@@ -282,18 +284,28 @@
                 data: [['','','','',''],['','','','',''],['','','','',''],['','','','',''],['','','','','']],
                 rowHeaders: ['Catastrophic','High','Medium','Low','Negligible'],
                 colHeaders: ['Very Unlikely','Unlikely','Possible','Likely','Almost Certain'],
-                width: '100%', height: 400, licenseKey: 'non-commercial-and-evaluation',
+                width: '100%',
+                height: 550,           // Increased from 400 to 550
+                rowHeights: 80,       // NEW: Set each row to 110px tall
+                colWidths: 120,
+                     rowHeaderWidth: 120,
+                licenseKey: 'non-commercial-and-evaluation',
                 cells: (row, col) => {
                     let r = (row === 0 && col >= 2) || (row === 1 && col >= 3) || (row <= 1 && col === 4) ? criticalRenderer :
                             (row === 0 && col >= 1) || (row === 1 && col >= 2) || (row === 2 && col >= 3) ? highRenderer :
                             (row === 2 && col >= 1) || (row === 3 && col >= 2) ? mediumRenderer : lowRenderer;
                     return { renderer: r };
+                },
+                afterChange: function(changes) {
+                    if (changes) {
+                        updateActionsVisibility();
+                    }
                 }
             });
         }
         function criticalRenderer(i, td, r, c, p, v, cp) {
             Handsontable.renderers.TextRenderer.apply(this, arguments);
-            td.style.background = '#f8d7da'; td.style.fontWeight = 'bold';
+            td.style.background = '#f8d7da'; td.style.fontWeight = 'bold';  td.style.fontSize = '16px';
         }
         function highRenderer(i, td, r, c, p, v, cp) {
             Handsontable.renderers.TextRenderer.apply(this, arguments);
@@ -386,7 +398,7 @@
             const actionsScore = (goodActions / 2) * 100;
             
             // Weight critical risk assessment heavily: 70% critical risks, 30% actions
-            const overallScore = Math.round((criticalScore * 0.7) + (actionsScore * 0.3));
+            const overallScore = Math.round((criticalScore * 0.5) + (actionsScore * 0.5));
             phaseScores.push(overallScore);
             if (overallScore >= 75) {
                 performanceTrajectory = performanceTrajectory === 'bad' ? 'mixed' : 'good';
@@ -476,6 +488,41 @@
             document.getElementById('submitBtn').textContent = 'Submit Assessment';
             document.getElementById('submitBtn').onclick = submitAssessment;
         }
+
+        // Add this function to check if all risks are placed
+        function areAllRisksPlaced() {
+            const data = hot.getData();
+            const placedRisks = new Set();
+            
+            // Check each cell in the matrix
+            for (let r = 0; r < data.length; r++) {
+                for (let c = 0; c < data[r].length; c++) {
+                    if (data[r][c]) {
+                        // Split multiple risks in same cell and add to set
+                        data[r][c].split(',').map(id => id.trim().toUpperCase())
+                            .forEach(id => {
+                                if (id) placedRisks.add(id);
+                            });
+                    }
+                }
+            }
+            
+            // Compare against current risks count
+            return placedRisks.size === currentRisks.length;
+        }
+
+        // Add this function to update actions section visibility
+        function updateActionsVisibility() {
+            const actionsSection = document.querySelector('.actions-section');
+            if (areAllRisksPlaced()) {
+                actionsSection.style.opacity = '1';
+                actionsSection.style.pointerEvents = 'auto';
+            } else {
+                actionsSection.style.opacity = '0.5';
+                actionsSection.style.pointerEvents = 'none';
+            }
+        }
+
         window.onload = () => { initMatrix(); displayRisks(); displayActions(); };
     </script>
 </body>
