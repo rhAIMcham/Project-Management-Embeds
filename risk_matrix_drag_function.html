@@ -312,7 +312,7 @@ button:hover {
     <div class="container">
         <h1>Risk matrix and management</h1>
         <p class="subtitle">Home renovation project</p>
-        <div class="round-indicator" id="roundIndicator">Phase 1 of 3 - Month 1</div>
+        <div class="round-indicator" id="roundIndicator">Phase 1 of 3 - Planning</div>
         <div class="instructions">
             <h3>Instructions</h3>
             <p><strong>Drag</strong> each risk from the list on the left and <strong>drop</strong> 
@@ -368,67 +368,83 @@ button:hover {
 <script>
     // Risk data for each phase
 const phase1Risks = [
-    { id: 'R1', description: 'Permit approval delays from city planning', correct: [0, 0] },
-    { id: 'R2', description: 'Inadequate site investigation for soil conditions', correct: [1, 3] },
-    { id: 'R3', description: 'Key subcontractor not yet secured', correct: [3, 2] },
-    { id: 'R4', description: 'Minor equipment rental availability issues', correct: [3, 1] },
-    { id: 'R5', description: 'Budget contingency too low for project scope', correct: [2, 3] }
+    { id: 'R1', description: 'Unforeseen structural issues with the building at large.', correct: [0, 2] },
+    { id: 'R2', description: 'Pushback from council on your submitted plans close to start date.', correct: [1, 3] },
+    { id: 'R3', description: 'Inaccurate schematics due to building age, meaning piping and electrical work might require more time', correct: [2, 3] },
+    { id: 'R4', description: 'Your contractors not having time to complete the work if there are any delays, as they have another project beginning very soon after yours has ended', correct: [3, 2] },
+    { id: 'R5', description: 'Potential reduction in income, as you have just started a new job', correct: [3, 1] }
 ];
 
 const phase1Actions = [
-    { id: 'A1', text: 'Hire experienced project manager with track record', quality: 'good' },
-    { id: 'A2', text: 'Complete comprehensive geotechnical survey', quality: 'good' },
-    { id: 'A3', text: 'Cut safety training budget to save costs', quality: 'bad' },
-    { id: 'A4', text: 'Establish relationships with backup subcontractors', quality: 'good' },
-    { id: 'A5', text: 'Defer permit applications to start work sooner', quality: 'bad' }
+    { id: 'A1', text: 'Call structural engineer to conduct through building inspection', quality: 'good' },
+    { id: 'A2', text: 'Start work early, trusting that the final round of approval from the council will not involve any major changes to your plans.', quality: 'bad' },
+    { id: 'A3', text: 'Plan for additional time in demolition and site prep in case of inaccurate schematics', quality: 'good' },
+    { id: 'A4', text: 'Try and organise additional contractors to be on call', quality: 'bad' },
+    { id: 'A5', text: 'Look into potential additional work options and maintain your resume should anything go wrong', quality: 'bad' }
 ];
 
 const phase2RisksGood = [
-    { id: 'R6', description: 'Minor concrete delivery scheduling conflicts', correct: [3, 1] },
-    { id: 'R7', description: 'Weather delays for outdoor work', correct: [4, 2] },
-    { id: 'R8', description: 'Temporary power supply interruptions', correct: [2, 1] },
-    { id: 'R9', description: 'Inspection scheduling conflicts', correct: [2, 2] },
-    { id: 'R10', description: 'Material cost fluctuations', correct: [3, 2] }
+    { id: 'R6', description: 'Builder access to site is harder than anticipated, possibly some damage to your garden and curb side', correct: [3, 2] },
+    { id: 'R7', description: 'Builders cars on streets disrupts your neighbours and causes congestion', correct: [2, 3] },
+    { id: 'R8', description: 'Concrete pour delayed due to potential rain', correct: [1, 2] },
+    { id: 'R9', description: 'Supplies delayed', correct: [2, 2] },
+    { id: 'R10', description: 'Temporary power supply disruptions to site due to unrelated council works', correct: [1, 2] }
 ];
 
 const phase2RisksBad = [
-    { id: 'R6', description: 'Major foundation issues from poor soil assessment', correct: [2, 4] },
-    { id: 'R7', description: 'Stop-work order due to permit violations', correct: [3, 4] },
-    { id: 'R8', description: 'Subcontractor quality problems affecting schedule', correct: [4, 3] },
-    { id: 'R9', description: 'Safety incident shuts down site', correct: [2, 4] },
-    { id: 'R10', description: 'Budget overrun threatens project completion', correct: [3, 3] }
+    { id: 'R6', description: 'Structural issues uncovered partway through demolition, impacting deadlines and budget', correct: [1, 2] },
+    { id: 'R7', description: 'Council planning permissions arrive after work has begun and require reworks', correct: [1, 3] },
+    { id: 'R8', description: 'Concrete pour impacted due to potential rain', correct: [2, 2] },
+    { id: 'R9', description: 'Safety incident shuts down site due to trade overlapping without clear communication', correct: [1, 1] },
+    { id: 'R10', description: 'Budgetary constraints mean supplies have to be downgraded', correct: [3, 3] }
 ];
 
-const phase2Actions = [
-    { id: 'A6', text: 'Implement daily quality control inspections', quality: 'good' },
-    { id: 'A7', text: 'Rush concrete pours to make up lost time', quality: 'bad' },
-    { id: 'A8', text: 'Increase contingency reserve from remaining budget', quality: 'good' },
-    { id: 'A9', text: 'Skip structural engineering review to save time', quality: 'bad' },
-    { id: 'A10', text: 'Establish weather monitoring and backup plans', quality: 'good' }
+const phase2ActionsGood = [
+    { id: 'A6', text: 'Plan to restore plants after building work is complete', quality: 'good' },
+    { id: 'A7', text: 'Schedule buffer days for weather delays, increasing the deadline', quality: 'good' },
+    { id: 'A8', text: 'Ask neighbours to park elsewhere while your building work is on-going', quality: 'bad' },
+    { id: 'A9', text: 'Set up backup power generators', quality: 'good' },
+    { id: 'A10', text: 'Skip some minor inspections to save time', quality: 'bad' }
+];
+
+const phase2ActionsBad = [
+    { id: 'A6', text: 'Hire structural engineering consultant, impacting budget', quality: 'good' },
+    { id: 'A7', text: 'Prioritise council planning permits being approved', quality: 'good' },
+    { id: 'A8', text: 'Use cheaper supplies and tradespeople to avoid more financial issues', quality: 'bad' },
+    { id: 'A9', text: 'Implement strict safety protocols and better on-site communication', quality: 'good' },
+    { id: 'A10', text: 'Do some of the work yourself to save on labour costs', quality: 'bad' }
 ];
 
 const phase3RisksGood = [
-    { id: 'R11', description: 'Minor punch list items need addressing', correct: [4, 1] },
-    { id: 'R12', description: 'Final inspection scheduling delays', correct: [3, 1] },
-    { id: 'R13', description: 'Landscaping weather dependencies', correct: [3, 2] },
-    { id: 'R14', description: 'Owner requested minor modifications', correct: [2, 2] },
-    { id: 'R15', description: 'Closeout documentation coordination', correct: [3, 1] }
+    { id: 'R11', description: 'Final installation requires expensive specialist', correct: [2, 2] },
+    { id: 'R12', description: 'Final third party inspection scheduling delays', correct: [2, 3] },
+    { id: 'R13', description: 'Substantial damage to garden, more than you had anticipated', correct: [3, 2] },
+    { id: 'R14', description: 'You want to make minor final modifications after seeing some elements in person for the first time.', correct: [3, 1] },
+    { id: 'R15', description: 'Parents arriving early', correct: [1, 2] }
 ];
 
 const phase3RisksBad = [
-    { id: 'R11', description: 'Major structural defects discovered in final inspection', correct: [2, 4] },
-    { id: 'R12', description: 'Building fails code compliance review', correct: [3, 4] },
-    { id: 'R13', description: 'Severe budget shortfall for completion', correct: [4, 4] },
-    { id: 'R14', description: 'Critical safety violations must be corrected', correct: [3, 4] },
-    { id: 'R15', description: 'Contractor threatens lawsuit over disputes', correct: [2, 3] }
+    { id: 'R11', description: 'Finalisation build steps skipped to meet deadline', correct: [1, 3] },
+    { id: 'R12', description: 'Building fails code compliance review', correct: [0, 2] },
+    { id: 'R13', description: 'Build not ready when parents are arriving', correct: [1, 2] },
+    { id: 'R14', description: 'Last-minute fixes needed due to rushed or poor work done yourself.', correct: [3, 3] },
+    { id: 'R15', description: 'Budget issues mean contractors paid late, work delayed further', correct: [1, 3] }
 ];
 
-const phase3Actions = [
-    { id: 'A11', text: 'Conduct thorough pre-final inspection walkthrough', quality: 'good' },
-    { id: 'A12', text: 'Cut corners on finishes to stay in budget', quality: 'bad' },
-    { id: 'A13', text: 'Hire independent inspector for verification', quality: 'good' },
-    { id: 'A14', text: 'Pressure inspectors to approve marginal work', quality: 'bad' },
-    { id: 'A15', text: 'Complete all documentation before final payment', quality: 'good' }
+const phase3ActionsGood = [
+    { id: 'A11', text: 'Conduct thorough pre-final inspection', quality: 'good' },
+    { id: 'A12', text: 'Properly record finishes and cosmetic details to make future maintenance easy', quality: 'good' },
+    { id: 'A13', text: 'Rush final touches to finish early', quality: 'bad' },
+    { id: 'A14', text: 'Schedule buffer for parents arriving', quality: 'good' },
+    { id: 'A15', text: 'Skip final quality checks as no issues have arisen thus far', quality: 'bad' }
+];
+
+const phase3ActionsBad = [
+    { id: 'A11', text: 'Organise for parents to stay elsewhere to extend deadline', quality: 'good' },
+    { id: 'A12', text: 'Ask for help from friends and family for any non-specialised work', quality: 'good' },
+    { id: 'A13', text: 'Cover up defects cosmetically', quality: 'bad' },
+    { id: 'A14', text: 'Reprioritise to finish buld and hope to rework some components in the future', quality: 'good' },
+    { id: 'A15', text: 'Ignore unpaid contractors and employ new ones to finish the build', quality: 'bad' }
 ];
 
 const impact = ['Catastrophic', 'High', 'Medium', 'Low', 'Negligible'];
@@ -720,51 +736,143 @@ function displayResults(score, feedback, goodActions) {
     const success = actionScore >= 75;
     div.className = 'results show ' + (success ? 'success' : actionScore >= 50 ? 'warning' : 'danger');
     
+    const actionFeedback = {
+        // Phase 1 Actions
+        'A1': 'Excellent choice! A structural inspection now can identify and prevent major issues before work begins.',
+        'A2': 'High risk choice. Starting without final council approval could lead to expensive rework and delays.',
+        'A3': 'Good choice. By planning for more time allowance, your timeline and project is more resilient.',
+        'A4': 'Having backup contractors sounds good, but should not be prioritised above structural quality and timeline flexibility.',
+        'A5': 'Focus should be on project risk management rather than personal contingency planning.',
+        
+        // Phase 2 Good Path Actions
+        'A6': 'Good planning! Addressing landscaping restoration early prevents future issues.',
+        'A7': 'Smart decision! Weather buffer in the schedule prevents cascade of delays.',
+        'A8': 'Poor neighbor relations could create project complications and complaints.',
+        'A9': 'Excellent! Backup power ensures work continuity despite external disruptions.',
+        'A10': 'Skipping inspections, even minor ones, often leads to issues later.',
+        
+        // Phase 2 Bad Path Actions
+        'A6': 'Right call! Expert structural help is worth the cost when issues arise.',
+        'A7': 'Critical decision! Proper permits must be prioritized to prevent work stoppage.',
+        'A8': 'Cutting costs on materials often leads to quality and safety issues.',
+        'A9': 'Excellent choice! Safety and communication are essential for project success.',
+        'A10': 'DIY work to save costs often leads to quality issues and rework. Focus should be on righting the structure and ensuring council compliance.',
+        
+        // Phase 3 Good Path Actions
+        'A11': 'Smart choice! Thorough inspection prevents post-completion issues.',
+        'A12': 'Good planning! Proper documentation helps with maintenance and warranty.',
+        'A13': 'Rushing final work often leads to quality issues and callbacks.',
+        'A14': 'Excellent! Buffer time for when your parents arrive reduces stress and rushing.',
+        'A15': 'Never skip quality checks, even with a good track record.',
+        
+        // Phase 3 Bad Path Actions
+        'A11': 'Good solution! Alternative accommodation helps manage deadline pressure.',
+        'A12': 'Smart thinking! Using help appropriately can speed up non-critical work.',
+        'A13': 'Cosmetic fixes without addressing root causes will lead to future problems.',
+        'A14': 'Practical approach! Prioritizing completion with planned future improvements.',
+        'A15': 'Payment disputes with contractors often escalate and delay completion.'
+    };
+
     const actionFb = selectedActions.map(id => {
-        const a = currentActions.find(x => x.id === id);
-        return `<li><strong>${a.id}:</strong> ${a.text} - ${a.quality === 'good' ? '✅ Good' : '❌ Poor'}</li>`;
+        const action = currentActions.find(x => x.id === id);
+        const quality = action.quality === 'good' ? '✅ Good Choice' : '❌ Poor Choice';
+        const feedback = actionFeedback[id] || 'No specific feedback available.';
+        return `<li class="action-feedback ${action.quality}">
+                    <strong>${action.id}:</strong> ${action.text}
+                    <br>
+                    <span class="quality-indicator">${quality}</span>
+                    <br>
+                    <span class="feedback-text">${feedback}</span>
+                </li>`;
     }).join('');
+
+    // Add some CSS to the page for the new feedback styles
+    if (!document.getElementById('feedback-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'feedback-styles';
+        styles.textContent = `
+            .action-feedback {
+                margin-bottom: 15px;
+                padding: 10px;
+                border-radius: 6px;
+                background: #f8f9fa;
+            }
+            .action-feedback.good {
+                border-left: 4px solid #28a745;
+            }
+            .action-feedback.bad {
+                border-left: 4px solid #dc3545;
+            }
+            .quality-indicator {
+                font-size: 0.9em;
+                font-weight: 500;
+            }
+            .feedback-text {
+                font-size: 0.9em;
+                color: #666;
+                font-style: italic;
+            }
+        `;
+        document.head.appendChild(styles);
+    }
 
     let msg = '';
     if (currentPhase === 1) {
         msg = actionScore >= 75 ? 
             `<h3>🎉 Good Action Choices! (${actionScore}%)</h3>
              <p><strong>Actions:</strong> ${goodActions}/2 selected correctly</p>
-             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? '⚠️ Consider reviewing risk identification process' : '✅'}</p>
+             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? 'Consider reviewing risk identification process' : '✅'}</p>
              <p>Strong decisions set good foundation. Moving to Month 2...</p>` :
             `<h3>⚠️ Review Action Choices (${actionScore}%)</h3>
              <p><strong>Actions:</strong> ${goodActions}/2 selected correctly</p>
-             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? '⚠️ Consider reviewing risk identification process' : '✅'}</p>
+             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? 'Consider reviewing risk identification process' : '✅'}</p>
              <p>Choices may lead to complications in Month 2...</p>`;
     } else if (currentPhase === 2) {
         msg = actionScore >= 75 ? 
             `<h3>🎉 Strong Action Planning! (${actionScore}%)</h3>
              <p><strong>Actions:</strong> ${goodActions}/2 selected correctly</p>
-             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? '⚠️ Consider reviewing risk identification process' : '✅'}</p>
+             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? 'Consider reviewing risk identification process' : '✅'}</p>
              <p>Good control measures in place. Final phase ahead...</p>` :
             `<h3>⚠️ Action Planning Needs Work (${actionScore}%)</h3>
              <p><strong>Actions:</strong> ${goodActions}/2 selected correctly</p>
-             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? '⚠️ Consider reviewing risk identification process' : '✅'}</p>
+             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? 'Consider reviewing risk identification process' : '✅'}</p>
              <p>Month 3 success depends on better control measures...</p>`;
     } else {
         const avg = Math.round((phaseScores.reduce((a,b) => a+b, 0) / 3));
-        msg = `<h3>📊 Project Complete!</h3>
+        msg = `<h3>Delivery day is here.</h3>
                <p><strong>Final Actions:</strong> ${goodActions}/2 correct (${actionScore}%)</p>
                <p><strong>Risk Assessment:</strong> ${riskScore}% ${riskScore < 60 ? '⚠️ Review risk identification process' : '✅'}</p>
                <p><strong>Overall Project Score:</strong> ${avg}%</p>
                <hr style="margin:15px 0">`;
         
-        // Final outcome based primarily on action choices
-        msg += actionScore >= 75 ? 
-            `<p><strong>🏆 PROJECT SUCCESS!</strong></p>
-             <p>Excellent control measures implemented. Project completed successfully!</p>
-             ${riskScore < 60 ? '<p>⚠️ Note: Improving risk identification could help future projects</p>' : ''}` :
-            `<p><strong>⚠️ PROJECT CHALLENGES</strong></p>
-             <p>Control measures could have been better chosen. Some project objectives compromised.</p>
-             ${riskScore < 60 ? '<p>⚠️ Better risk identification could improve future action choices</p>' : ''}`;
+        // Enhanced outcome messaging based on trajectory and actions
+        if (performanceTrajectory === 'good') {
+            if (goodActions === 2) {
+                msg += `<p><strong>Excellent project management</strong></p>
+                       <p>You maintained good project control throughout and made excellent final decisions. 
+                       The project is completed successfully and under budget!</p>`;
+            } else {
+                msg += `<p><strong>Partial success</strong></p>
+                       <p>While the project was on a good track, some of your final actions weren't optimal. 
+                       The project completed but with some minor issues that better choices could have prevented.</p>
+                       <p>Review your action choices: some selected actions weren't the best options available.</p>`;
+            }
+        } else {
+            if (goodActions === 2) {
+                msg += `<p><strong>Project succeeded, but there is room for improvement</strong></p>
+                       <p>Despite earlier challenges, your excellent final decisions helped salvage the project. 
+                       While completed, the project exceeded initial budget and timeline.</p>
+                       <p>Identifying and controlling risks, specifically which risks are the most significant and important to control, can help avoid project delays and challenges.</p>`;
+            } else {
+                msg += `<p><strong>Project failure</strong></p>
+                       <p>The combination of earlier challenges and poor final decisions led to project failure. 
+                       Critical objectives were not met.</p>
+                       <p>For future projects, focus on both early risk identification AND selecting appropriate control measures.</p>`;
+            }
+        }
     }
     
-    div.innerHTML = msg + '<h4 style="margin-top:15px">Selected Actions:</h4><ul>' + actionFb + '</ul>';
+    div.innerHTML = msg + '<h4 style="margin-top:15px">Selected Actions & Feedback:</h4><ul style="list-style: none; padding: 0;">' + actionFb + '</ul>';
 
     // Add risk placement feedback in collapsible section
     const riskFeedbackSection = document.createElement('div');
@@ -805,13 +913,13 @@ function nextPhase() {
     currentPhase++;
     selectedActions = [];
     if (currentPhase === 2) {
-        document.getElementById('roundIndicator').textContent = 'Phase 2 of 3 - Month 2: Foundation & Structure';
+        document.getElementById('roundIndicator').textContent = 'Phase 2 of 3 - Build phase';
         currentRisks = performanceTrajectory === 'good' ? phase2RisksGood : phase2RisksBad;
-        currentActions = phase2Actions;
+        currentActions = performanceTrajectory === 'good' ? phase2ActionsGood : phase2ActionsBad;
     } else {
-        document.getElementById('roundIndicator').textContent = 'Phase 3 of 3 - Month 3: Completion';
+        document.getElementById('roundIndicator').textContent = 'Phase 3 of 3 - Finishing touches';
         currentRisks = performanceTrajectory === 'good' ? phase3RisksGood : phase3RisksBad;
-        currentActions = phase3Actions;
+        currentActions = performanceTrajectory === 'good' ? phase3ActionsGood : phase3ActionsBad;
     }
     displayRisks();
     displayActions();
