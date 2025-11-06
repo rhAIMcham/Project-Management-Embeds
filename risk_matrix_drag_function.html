@@ -431,6 +431,9 @@ const phase3Actions = [
     { id: 'A15', text: 'Complete all documentation before final payment', quality: 'good' }
 ];
 
+const impact = ['Catastrophic', 'High', 'Medium', 'Low', 'Negligible'];
+const likelihood = ['Very Unlikely', 'Unlikely', 'Possible', 'Likely', 'Almost Certain'];
+
 // Global state
 let currentPhase = 1;
 let currentRisks = phase1Risks;
@@ -454,12 +457,36 @@ function initMatrix() {
         colWidths: 120,
         rowHeaderWidth: 120,
         licenseKey: 'non-commercial-and-evaluation',
-        cells: (row, col) => {
-            let r = (row === 0 && col >= 2) || (row === 1 && col >= 3) || (row <= 1 && col === 4) ? criticalRenderer :
-                    (row === 0 && col >= 1) || (row === 1 && col >= 2) || (row === 2 && col >= 3) ? highRenderer :
-                    (row === 2 && col >= 1) || (row === 3 && col >= 2) ? mediumRenderer : lowRenderer;
-            return { renderer: r, readOnly: true };
-        }
+cells: (row, col) => {
+    let r;
+    
+    // Critical risk cells
+    if ((row === 0 && col >= 2) || 
+        (row === 1 && col >= 3)) {
+        r = criticalRenderer;
+    }
+    // High risk cells
+    else if ((row === 0 && col >= 1) || 
+             (row === 1 && col === 2) || 
+             (row === 2 && col >= 2 && col <= 4) ||
+             (row === 3 && col === 4)) {
+        r = highRenderer;
+    }
+    // Medium cells
+    else if ((row === 0 && col === 0) || 
+             (row === 1 && col >= 0 && col <= 1) || 
+             (row === 2 && col === 1) ||              // Changed: only col 1 for row 2
+             (row === 3 && col >= 2 && col <= 3) || 
+             (row === 4 && col === 4)) {
+        r = mediumRenderer;
+    }
+    // Low cells (everything else)
+    else {
+        r = lowRenderer;
+    }
+    
+    return { renderer: r, readOnly: true };
+}
     });
 }
 
@@ -627,6 +654,8 @@ function submitAssessment() {
         alert('Please select exactly 2 actions before submitting.');
         return;
     }
+
+    // Calculate risk assessment accuracy
     const data = hot.getData();
     userAnswers = {};
     for (let r = 0; r < data.length; r++) {
@@ -638,46 +667,46 @@ function submitAssessment() {
             }
         }
     }
-    let criticalCorrect = 0, criticalTotal = 0;
-    const impact = ['Catastrophic','High','Medium','Low','Negligible'];
-    const likelihood = ['Very Unlikely','Unlikely','Possible','Likely','Almost Certain'];
+
+    // Calculate risk placement accuracy
+    let correctRisks = 0;
     const feedback = currentRisks.map(risk => {
         const ua = userAnswers[risk.id];
         const isCorrect = ua && ua[0] === risk.correct[0] && ua[1] === risk.correct[1];
-        
-        // Identify critical risks: High/Catastrophic impact OR High likelihood
-        const isCritical = risk.correct[0] <= 1 || risk.correct[1] >= 3;
-        if (isCritical) {
-            criticalTotal++;
-            if (isCorrect) criticalCorrect++;
-        }
+        if (isCorrect) correctRisks++;
         
         return {
-            id: risk.id, description: risk.description, correct: isCorrect, critical: isCritical,
+            id: risk.id,
+            description: risk.description,
+            correct: isCorrect,
             userAnswer: ua ? `${likelihood[ua[1]]}, ${impact[ua[0]]}` : 'Not placed',
             correctAnswer: `${likelihood[risk.correct[1]]}, ${impact[risk.correct[0]]}`
         };
     });
-    
-    // Score based primarily on critical risks
-    const criticalScore = criticalTotal > 0 ? (criticalCorrect / criticalTotal) * 100 : 100;
-    assessmentAccuracy = Math.round(criticalScore);
-    
+
+    // Calculate action success
     let goodActions = selectedActions.filter(id => 
         currentActions.find(a => a.id === id)?.quality === 'good'
     ).length;
-    const actionsScore = (goodActions / 2) * 100;
-    
-    // Weight critical risk assessment heavily: 70% critical risks, 30% actions
-    const overallScore = Math.round((criticalScore * 0.4) + (actionsScore * 0.6));
-    phaseScores.push(overallScore);
-    if (overallScore >= 75) {
-        performanceTrajectory = performanceTrajectory === 'bad' ? 'mixed' : 'good';
-    } else if (overallScore >= 50) {
-        performanceTrajectory = 'mixed';
+
+    // Calculate scores
+    const riskAccuracy = (correctRisks / currentRisks.length) * 100;
+    const actionScore = (goodActions / 2) * 100;
+    assessmentAccuracy = Math.round(riskAccuracy);
+
+    // Determine performance trajectory for next phase
+    // Good actions (2/2) OR good risk assessment (>75%) leads to good trajectory
+    if (goodActions === 2 || riskAccuracy >= 75) {
+        performanceTrajectory = 'good';
     } else {
         performanceTrajectory = 'bad';
     }
+
+    // Calculate overall score for phase completion
+    const overallScore = Math.round((riskAccuracy * 0.4) + (actionScore * 0.6));
+    phaseScores.push(overallScore);
+
+    // Display results
     displayResults(overallScore, feedback, goodActions);
 }
 
