@@ -459,6 +459,7 @@
         id: 1,
         name: "Website Development",
         modelAnswerImage: "website-development-answer.png",
+        idealDuration: 12, // Static ideal duration
         tasks: [
           { id: "A", name: "Planning", duration: 3, deps: [] },
           { id: "B", name: "Design", duration: 4, deps: ["A"] },
@@ -471,6 +472,7 @@
         id: 2,
         name: "Event Planning",
         modelAnswerImage: "event-planning-answer.png",
+        idealDuration: 8, // Static ideal duration
         tasks: [
           { id: "A", name: "Book Venue", duration: 2, deps: [] },
           { id: "B", name: "Catering", duration: 3, deps: [] },
@@ -483,6 +485,7 @@
         id: 3,
         name: "Product Launch",
         modelAnswerImage: "product-launch-answer.png",
+        idealDuration: 13, // Static ideal duration
         tasks: [
           { id: "A", name: "Research", duration: 4, deps: [] },
           { id: "B", name: "Prototype", duration: 5, deps: ["A"] },
@@ -568,12 +571,11 @@
     function render() {
       const project = getCurrentProject();
       const computed = computeCPM(project.tasks, state.minStart);
-      const idealComputed = computeCPM(project.tasks, {});
       const maxTime = Math.ceil(computed.projectDuration * 1.2);
 
       document.getElementById('project-name').textContent = project.name;
       document.getElementById('duration').textContent = computed.projectDuration;
-      document.getElementById('ideal-duration').textContent = idealComputed.projectDuration;
+      document.getElementById('ideal-duration').textContent = project.idealDuration; // Use static ideal duration
 
       renderScale(maxTime);
       renderTasks(project, computed, maxTime);
