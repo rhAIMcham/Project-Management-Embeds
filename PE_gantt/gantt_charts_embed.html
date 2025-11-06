@@ -391,6 +391,9 @@
       border-radius: 0.5rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    .modal-feedback {
+      margin: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -448,6 +451,7 @@
 
     <div style="display: flex; justify-content: center; margin-top: 1rem;">
       <button class="modal-btn modal-btn-primary" id="compare-btn">Compare with Model Answer</button>
+     <!--<button class="modal-btn modal-btn-primary" id="reset-btn">Reset projects</button>-->
     </div>
   </div>
 
@@ -460,6 +464,7 @@
         name: "Website Development",
         modelAnswerImage: "website-development-answer.png",
         idealDuration: 12, // Static ideal duration
+        feedback: "In this model answer, the project duration is 12 units. This is achieved by staggering some of the tasks, as development of the site can begin on a basic level before the whole website design is finalised. Similarly, the content doesn't need to be completely finalised for basic code development to begin. <br> If this Gantt chart was more detailed, there would be individual tasks within each of these larger tasks including milestones such as 'Website structure design approved', at which point basic development can begin. As a project manager, your ability to identify these situations can help introduce slack into otherwise very tight deadlines, or create more time for review and fine tuning by having all resources utilised concurrently.",
         tasks: [
           { id: "A", name: "Planning", duration: 3, deps: [] },
           { id: "B", name: "Design", duration: 4, deps: ["A"] },
@@ -472,26 +477,30 @@
         id: 2,
         name: "Event Planning",
         modelAnswerImage: "event-planning-answer.png",
-        idealDuration: 8, // Static ideal duration
+        idealDuration: 12, // Static ideal duration
+        feedback:"In this chart, the project duration here is reduced by identifying that catering is not a required prerequisite for the decorations to be purchased. The venue will impact which decorations are needed or suitable, but the catering is unlikely to.",
         tasks: [
-          { id: "A", name: "Book Venue", duration: 2, deps: [] },
-          { id: "B", name: "Catering", duration: 3, deps: [] },
-          { id: "C", name: "Invitations", duration: 4, deps: ["A"] },
-          { id: "D", name: "Setup Plan", duration: 2, deps: ["A", "B"] },
-          { id: "E", name: "Final Check", duration: 1, deps: ["C", "D"] }
+          { id: "A", name: "Confirm attendees", duration: 2, deps: [] },
+          { id: "B", name: "Book venue", duration: 4, deps: ["A"] },
+         { id: "C", name: "Book catering", duration: 2, deps: ["B"] },
+          { id: "D", name: "Purchase decorations", duration: 3, deps: ["B", "C"] },
+          { id: "E", name: "Setup Plan", duration: 2, deps: ["B", "C", "D"] },
+          { id: "F", name: "Final Check", duration: 1, deps: ["E"] }
         ]
       },
       {
         id: 3,
-        name: "Product Launch",
-        modelAnswerImage: "product-launch-answer.png",
-        idealDuration: 13, // Static ideal duration
+        name: "Garden renovation",
+        modelAnswerImage: "garden-renovation-answer.png",
+        idealDuration: 14, // Static ideal duration
+        feedback:"In this Gantt chart, the renovation timeline is reduced to 14 days by correctly identifying the critical tasks based on dependencies. The survey of the soil quality, the process of improving the soil quality, and the planting of the garden beds form the critical path.",
         tasks: [
-          { id: "A", name: "Research", duration: 4, deps: [] },
-          { id: "B", name: "Prototype", duration: 5, deps: ["A"] },
-          { id: "C", name: "Marketing", duration: 3, deps: ["A"] },
-          { id: "D", name: "Production", duration: 4, deps: ["B"] },
-          { id: "E", name: "Launch", duration: 3, deps: ["C", "D"] }
+          { id: "A", name: "Survey existing garden and soil quality", duration: 4, deps: [] },
+          { id: "B", name: "Remove decking", duration: 2, deps: ["A"] },
+          { id: "C", name: "Improve soil quality", duration: 7, deps: ["B", "A"] },
+          { id: "D", name: "Order plants and materials", duration: 3, deps: ["C", "A"] },
+          { id: "E", name: "Build new decking", duration: 3, deps: ["D" , "B"] },
+          { id: "F", name: "Plant garden beds", duration: 3, deps: ["E", "C", "D"] }
         ]
       }
     ];
@@ -867,7 +876,10 @@
             <h3 class="modal-title">Model Answer: ${project.name}</h3>
             <button class="close-btn">×</button>
           </div>
-          
+          <div class="modal-feedback">
+            <p>Ideal duration: ${project.idealDuration}</p><br>
+            <p>${project.feedback}</p>
+            </div>
           <div style="margin-bottom: 1rem;">
             <img src="${project.modelAnswerImage}" alt="Model Answer for ${project.name}" class="model-answer-image" />
           </div>
