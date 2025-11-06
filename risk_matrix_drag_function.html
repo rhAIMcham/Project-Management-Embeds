@@ -315,7 +315,10 @@ button:hover {
         <div class="round-indicator" id="roundIndicator">Phase 1 of 3 - Month 1</div>
         <div class="instructions">
             <h3>Instructions</h3>
-            <p><strong>Drag</strong> each risk from the list on the left and <strong>drop</strong> it into the appropriate cell of the risk matrix based on its likelihood and impact. Then, select <strong>2 actions</strong> from the available options to manage these risks. Your choices will impact the project's trajectory!</p>
+            <p><strong>Drag</strong> each risk from the list on the left and <strong>drop</strong> 
+                it into the appropriate cell of the risk matrix based on its likelihood and impact.
+                 Then, select <strong>2 actions</strong> from the available options to manage these risks. 
+                 Your choices will impact the project's trajectory! Remember, the risk matrix is a tool to help you prioritise resources and manage project risks before the arise. Use the risk register to inform your choice of action, as you are only able to select two from the five actions available.</p>
         </div>
         <div class="content-grid">
             <div class="risk-list">
@@ -666,7 +669,7 @@ function submitAssessment() {
     const actionsScore = (goodActions / 2) * 100;
     
     // Weight critical risk assessment heavily: 70% critical risks, 30% actions
-    const overallScore = Math.round((criticalScore * 0.5) + (actionsScore * 0.5));
+    const overallScore = Math.round((criticalScore * 0.4) + (actionsScore * 0.6));
     phaseScores.push(overallScore);
     if (overallScore >= 75) {
         performanceTrajectory = performanceTrajectory === 'bad' ? 'mixed' : 'good';
@@ -681,37 +684,83 @@ function submitAssessment() {
 // Display results after submission
 function displayResults(score, feedback, goodActions) {
     const div = document.getElementById('results');
-    div.className = 'results show ' + (score >= 75 ? 'success' : score >= 50 ? 'warning' : 'danger');
+    const actionScore = (goodActions / 2) * 100;
+    const riskScore = assessmentAccuracy;
+    
+    // Determine success based primarily on actions
+    const success = actionScore >= 75;
+    div.className = 'results show ' + (success ? 'success' : actionScore >= 50 ? 'warning' : 'danger');
+    
     const actionFb = selectedActions.map(id => {
         const a = currentActions.find(x => x.id === id);
         return `<li><strong>${a.id}:</strong> ${a.text} - ${a.quality === 'good' ? '✅ Good' : '❌ Poor'}</li>`;
     }).join('');
+
     let msg = '';
     if (currentPhase === 1) {
-        msg = score >= 75 ? `<h3>🎉 Excellent Phase 1! (${score}%)</h3><p><strong>Risk:</strong> ${assessmentAccuracy}% | <strong>Actions:</strong> ${goodActions}/2</p><p>Strong foundation set. Project on track. Moving to Month 2...</p>` :
-              score >= 50 ? `<h3>⚠️ Adequate Phase 1 (${score}%)</h3><p><strong>Risk:</strong> ${assessmentAccuracy}% | <strong>Actions:</strong> ${goodActions}/2</p><p>Some gaps. Complications will need attention in Month 2...</p>` :
-                           `<h3>❌ Challenging Phase 1 (${score}%)</h3><p><strong>Risk:</strong> ${assessmentAccuracy}% | <strong>Actions:</strong> ${goodActions}/2</p><p>Significant issues emerged. Month 2 will present serious challenges...</p>`;
+        msg = actionScore >= 75 ? 
+            `<h3>🎉 Good Action Choices! (${actionScore}%)</h3>
+             <p><strong>Actions:</strong> ${goodActions}/2 selected correctly</p>
+             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? '⚠️ Consider reviewing risk identification process' : '✅'}</p>
+             <p>Strong decisions set good foundation. Moving to Month 2...</p>` :
+            `<h3>⚠️ Review Action Choices (${actionScore}%)</h3>
+             <p><strong>Actions:</strong> ${goodActions}/2 selected correctly</p>
+             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? '⚠️ Consider reviewing risk identification process' : '✅'}</p>
+             <p>Choices may lead to complications in Month 2...</p>`;
     } else if (currentPhase === 2) {
-        msg = score >= 75 ? `<h3>🎉 Strong Phase 2! (${score}%)</h3><p><strong>Risk:</strong> ${assessmentAccuracy}% | <strong>Actions:</strong> ${goodActions}/2</p><p>Excellent management. ${performanceTrajectory === 'good' ? 'Strong momentum!' : 'Recovering well!'} Final phase...</p>` :
-              score >= 50 ? `<h3>⚠️ Mixed Phase 2 (${score}%)</h3><p><strong>Risk:</strong> ${assessmentAccuracy}% | <strong>Actions:</strong> ${goodActions}/2</p><p>Uncertain stability. Month 3 will determine outcomes...</p>` :
-                           `<h3>❌ Difficult Phase 2 (${score}%)</h3><p><strong>Risk:</strong> ${assessmentAccuracy}% | <strong>Actions:</strong> ${goodActions}/2</p><p>Serious challenges. Month 3 requires immediate action...</p>`;
+        msg = actionScore >= 75 ? 
+            `<h3>🎉 Strong Action Planning! (${actionScore}%)</h3>
+             <p><strong>Actions:</strong> ${goodActions}/2 selected correctly</p>
+             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? '⚠️ Consider reviewing risk identification process' : '✅'}</p>
+             <p>Good control measures in place. Final phase ahead...</p>` :
+            `<h3>⚠️ Action Planning Needs Work (${actionScore}%)</h3>
+             <p><strong>Actions:</strong> ${goodActions}/2 selected correctly</p>
+             <p>Risk Assessment: ${riskScore}% ${riskScore < 60 ? '⚠️ Consider reviewing risk identification process' : '✅'}</p>
+             <p>Month 3 success depends on better control measures...</p>`;
     } else {
-        const avg = Math.round(phaseScores.reduce((a,b) => a+b, 0) / 3);
-        msg = `<h3>📊 Project Complete!</h3><p><strong>P1:</strong> ${phaseScores[0]}% | <strong>P2:</strong> ${phaseScores[1]}% | <strong>P3:</strong> ${score}%</p><p><strong>Overall:</strong> ${avg}%</p><p><strong>Final Risk:</strong> ${assessmentAccuracy}% | <strong>Actions:</strong> ${goodActions}/2</p><ul>${actionFb}</ul><hr style="margin:15px 0">`;
-        msg += avg >= 75 ? `<p><strong>🏆 PROJECT SUCCESS!</strong></p><p>Outstanding management. Building completed on time, within budget, meets all standards!</p>` :
-               avg >= 60 ? `<p><strong>✅ PROJECT COMPLETED</strong></p><p>Finished with compromises. ${performanceTrajectory === 'good' ? 'Early performance helped.' : 'Inconsistent management.'} Minor delays and overruns.</p>` :
-                          `<p><strong>⚠️ PROJECT TROUBLED</strong></p><p>Poor management created problems. Quality issues, cost overruns, regulatory concerns. Remedial work may be needed.</p>`;
+        const avg = Math.round((phaseScores.reduce((a,b) => a+b, 0) / 3));
+        msg = `<h3>📊 Project Complete!</h3>
+               <p><strong>Final Actions:</strong> ${goodActions}/2 correct (${actionScore}%)</p>
+               <p><strong>Risk Assessment:</strong> ${riskScore}% ${riskScore < 60 ? '⚠️ Review risk identification process' : '✅'}</p>
+               <p><strong>Overall Project Score:</strong> ${avg}%</p>
+               <hr style="margin:15px 0">`;
+        
+        // Final outcome based primarily on action choices
+        msg += actionScore >= 75 ? 
+            `<p><strong>🏆 PROJECT SUCCESS!</strong></p>
+             <p>Excellent control measures implemented. Project completed successfully!</p>
+             ${riskScore < 60 ? '<p>⚠️ Note: Improving risk identification could help future projects</p>' : ''}` :
+            `<p><strong>⚠️ PROJECT CHALLENGES</strong></p>
+             <p>Control measures could have been better chosen. Some project objectives compromised.</p>
+             ${riskScore < 60 ? '<p>⚠️ Better risk identification could improve future action choices</p>' : ''}`;
     }
-    div.innerHTML = msg + '<ul>' + actionFb + '</ul>';
+    
+    div.innerHTML = msg + '<h4 style="margin-top:15px">Selected Actions:</h4><ul>' + actionFb + '</ul>';
+
+    // Add risk placement feedback in collapsible section
+    const riskFeedbackSection = document.createElement('div');
+    riskFeedbackSection.innerHTML = `
+        <h4 style="margin-top:20px;cursor:pointer;color:#666;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'grid' : 'none'">
+            ▼ View Risk Placement Details
+        </h4>`;
+    
     const grid = document.createElement('div');
     grid.className = 'results-grid';
+    grid.style.display = 'none';
     feedback.forEach(f => {
         const card = document.createElement('div');
         card.className = `result-card ${f.correct ? 'correct' : 'incorrect'}`;
-        card.innerHTML = `<div class="risk-id">${f.id}</div><div style="font-size:14px;margin-bottom:8px">${f.description}</div><div style="font-size:12px;color:#666"><strong>Your:</strong> ${f.userAnswer}<br><strong>Correct:</strong> ${f.correctAnswer}</div>`;
+        card.innerHTML = `<div class="risk-id">${f.id}</div>
+                         <div style="font-size:14px;margin-bottom:8px">${f.description}</div>
+                         <div style="font-size:12px;color:#666">
+                             <strong>Your:</strong> ${f.userAnswer}<br>
+                             <strong>Correct:</strong> ${f.correctAnswer}
+                         </div>`;
         grid.appendChild(card);
     });
-    div.appendChild(grid);
+    riskFeedbackSection.appendChild(grid);
+    div.appendChild(riskFeedbackSection);
+
     const btn = document.getElementById('submitBtn');
     if (currentPhase < 3) {
         btn.textContent = `Continue to Phase ${currentPhase + 1}`;
