@@ -215,7 +215,7 @@
     .instructions {
       background: #eff6ff;
       border-left: 4px solid var(--blue);
-      padding: 1rem;
+      padding: 2rem;
       border-radius: 0.5rem;
       margin-bottom: 2rem;
     }
@@ -226,22 +226,183 @@
       color: var(--blue);
     }
 
-    .instructions p {
+    .instructions ul {
+      margin-left: 1.5rem;
       color: #374151;
       font-size: 0.9rem;
+    }
+
+    .instructions li {
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--blue);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6b7280;
+      padding: 0;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .close-btn:hover {
+      background: #f3f4f6;
+    }
+
+    .modal-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-section-title {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #374151;
+    }
+
+    .dependency-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .dependency-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: #f9fafb;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .dependency-item:hover {
+      background: #f3f4f6;
+    }
+
+    .checkbox {
+      width: 1.25rem;
+      height: 1.25rem;
+      cursor: pointer;
+    }
+
+    .dependency-info {
+      flex: 1;
+    }
+
+    .dependency-name {
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .dependency-duration {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .modal-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn-primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .modal-btn-primary:hover {
+      background: #3a4785;
+    }
+
+    .modal-btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .modal-btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .compare-modal {
+      max-width: 900px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .model-answer-image {
+      width: 100%;
+      height: auto;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Critical Path Explorer</h1>
-    <p class="subtitle">Drag tasks to explore how slack affects the critical path</p>
-
     <div class="instructions">
       <h3>How to use:</h3>
-      <p>🎯 Drag any task bar left or right to change its start time<br>
-      📊 Watch how the critical path (red tasks) changes as you move tasks beyond their slack<br>
-      ⚠️ Moving a critical path task will shift dependent tasks and may extend the project deadline</p>
+      <ul>
+        <li>Drag any task bar left or right to change its start time</li>
+        <li>Click on a task to edit its dependencies</li>
+        <li>Watch how the critical path (red tasks) changes as you move tasks beyond their slack</li>
+        <li>Moving a critical path task will shift dependent tasks and may extend the project deadline</li>
+      </ul>
     </div>
 
     <div class="project-selector" id="project-selector"></div>
@@ -249,7 +410,10 @@
     <div class="chart-section">
       <div class="chart-header">
         <h2 class="chart-title" id="project-name"></h2>
-        <div class="duration">Duration: <strong id="duration">0</strong> days</div>
+        <div style="display: flex; gap: 2rem; align-items: center;">
+          <div class="duration">Duration: <strong id="duration">0</strong> days</div>
+          <div class="duration">Ideal Duration: <strong id="ideal-duration">0</strong> days</div>
+        </div>
       </div>
 
       <div class="scale-header" id="scale-header"></div>
@@ -281,13 +445,20 @@
         <div>Slack = LS - ES</div>
       </div>
     </div>
+
+    <div style="display: flex; justify-content: center; margin-top: 1rem;">
+      <button class="modal-btn modal-btn-primary" id="compare-btn">Compare with Model Answer</button>
+    </div>
   </div>
+
+  <div id="modal-container"></div>
 
   <script>
     const PROJECTS = [
       {
         id: 1,
         name: "Website Development",
+        modelAnswerImage: "website-development-answer.png",
         tasks: [
           { id: "A", name: "Planning", duration: 3, deps: [] },
           { id: "B", name: "Design", duration: 4, deps: ["A"] },
@@ -299,6 +470,7 @@
       {
         id: 2,
         name: "Event Planning",
+        modelAnswerImage: "event-planning-answer.png",
         tasks: [
           { id: "A", name: "Book Venue", duration: 2, deps: [] },
           { id: "B", name: "Catering", duration: 3, deps: [] },
@@ -310,6 +482,7 @@
       {
         id: 3,
         name: "Product Launch",
+        modelAnswerImage: "product-launch-answer.png",
         tasks: [
           { id: "A", name: "Research", duration: 4, deps: [] },
           { id: "B", name: "Prototype", duration: 5, deps: ["A"] },
@@ -324,7 +497,9 @@
       currentProjectId: 1,
       minStart: {},
       dragging: null,
-      unitWidth: 40
+      unitWidth: 40,
+      clickStartTime: 0,
+      clickStartPos: { x: 0, y: 0 }
     };
 
     function getCurrentProject() {
@@ -336,7 +511,6 @@
       const byId = {};
       tasks.forEach(t => byId[t.id] = t);
 
-      // Topological sort
       const indeg = {};
       const graph = {};
       tasks.forEach(t => {
@@ -359,7 +533,6 @@
         });
       }
 
-      // Forward pass
       for (const id of order) {
         const t = byId[id];
         const predEF = t.deps.length ? Math.max(...t.deps.map(p => EF[p])) : 0;
@@ -369,7 +542,6 @@
 
       const projectDuration = Math.max(...Object.values(EF));
 
-      // Backward pass
       const succs = {};
       tasks.forEach(t => t.deps.forEach(d => {
         succs[d] = succs[d] || [];
@@ -396,10 +568,12 @@
     function render() {
       const project = getCurrentProject();
       const computed = computeCPM(project.tasks, state.minStart);
+      const idealComputed = computeCPM(project.tasks, {});
       const maxTime = Math.ceil(computed.projectDuration * 1.2);
 
       document.getElementById('project-name').textContent = project.name;
       document.getElementById('duration').textContent = computed.projectDuration;
+      document.getElementById('ideal-duration').textContent = idealComputed.projectDuration;
 
       renderScale(maxTime);
       renderTasks(project, computed, maxTime);
@@ -481,8 +655,12 @@
 
           const predIdx = project.tasks.indexOf(pred);
           const predStart = state.minStart[pred.id] ?? computed.ES[pred.id];
-          const predEndX = 24 + (predStart + pred.duration) * state.unitWidth;
+          const predEnd = predStart + pred.duration;
+          const predEndX = 24 + predEnd * state.unitWidth;
           const predY = predIdx * 110 + 40;
+
+          const gap = tgtStart - predEnd;
+          const hasGap = gap >= 1;
 
           const midX = (predEndX + tgtX) / 2;
           const isCritLink = computed.critical.has(depId) && computed.critical.has(task.id);
@@ -492,7 +670,10 @@
           path.setAttribute('fill', 'none');
           path.setAttribute('stroke', isCritLink ? '#ef4444' : '#9ca3af');
           path.setAttribute('stroke-width', '2');
-          path.setAttribute('marker-end', isCritLink ? 'url(#arrow-red)' : 'url(#arrow-gray)');
+          
+          if (hasGap) {
+            path.setAttribute('marker-end', isCritLink ? 'url(#arrow-red)' : 'url(#arrow-gray)');
+          }
           
           paths.appendChild(path);
         });
@@ -505,20 +686,32 @@
       const computed = computeCPM(project.tasks, state.minStart);
       const start = state.minStart[taskId] ?? computed.ES[taskId];
 
+      state.clickStartTime = Date.now();
+      state.clickStartPos = { x: e.clientX, y: e.clientY };
+
       state.dragging = {
         id: taskId,
         startX: e.clientX,
-        origStart: start
+        origStart: start,
+        hasMoved: false
       };
     }
 
     function handleMouseMove(e) {
       if (!state.dragging) return;
 
+      const dx = Math.abs(e.clientX - state.clickStartPos.x);
+      const dy = Math.abs(e.clientY - state.clickStartPos.y);
+      
+      if (dx > 5 || dy > 5) {
+        state.dragging.hasMoved = true;
+      }
+
+      if (!state.dragging.hasMoved) return;
+
       const project = getCurrentProject();
       const task = project.tasks.find(t => t.id === state.dragging.id);
       
-      // Calculate the minimum allowed start based on predecessor tasks
       let minAllowedStart = 0;
       if (task.deps.length > 0) {
         const computed = computeCPM(project.tasks, state.minStart);
@@ -532,15 +725,21 @@
         });
       }
 
-      const dx = e.clientX - state.dragging.startX;
-      const deltaUnits = Math.round(dx / state.unitWidth);
+      const deltaX = e.clientX - state.dragging.startX;
+      const deltaUnits = Math.round(deltaX / state.unitWidth);
       const newStart = Math.max(minAllowedStart, state.dragging.origStart + deltaUnits);
 
       state.minStart[state.dragging.id] = newStart;
       render();
     }
 
-    function handleMouseUp() {
+    function handleMouseUp(e) {
+      if (state.dragging && !state.dragging.hasMoved) {
+        const timeSinceDown = Date.now() - state.clickStartTime;
+        if (timeSinceDown < 300) {
+          openDependencyModal(state.dragging.id);
+        }
+      }
       state.dragging = null;
     }
 
@@ -562,52 +761,131 @@
       });
     }
 
-    
-    function renderArrows(project, computed, maxTime) {
-      const svg = document.getElementById('arrows-svg');
-      const paths = document.getElementById('arrow-paths');
-      const chartWidth = 24 + (maxTime + 1) * state.unitWidth;
-      const chartHeight = project.tasks.length * 120 + 20;
+    function openDependencyModal(taskId) {
+      const project = getCurrentProject();
+      const task = project.tasks.find(t => t.id === taskId);
+      if (!task) return;
 
-      svg.setAttribute('viewBox', `0 0 ${chartWidth} ${chartHeight}`);
-      paths.innerHTML = '';
-
-      project.tasks.forEach((task, tgtIdx) => {
-        const tgtStart = state.minStart[task.id] ?? computed.ES[task.id];
-        const tgtX = 24 + tgtStart * state.unitWidth;
-        const tgtY = tgtIdx * 110 + 40;
-
-        task.deps.forEach(depId => {
-          const pred = project.tasks.find(t => t.id === depId);
-          if (!pred) return;
-
-          const predIdx = project.tasks.indexOf(pred);
-          const predStart = state.minStart[pred.id] ?? computed.ES[pred.id];
-          const predEnd = predStart + pred.duration;
-          const predEndX = 24 + predEnd * state.unitWidth;
-          const predY = predIdx * 110 + 40;
-
-          const gap = tgtStart - predEnd;
-          const hasGap = gap >= 1;
-
-          const midX = (predEndX + tgtX) / 2;
-          const isCritLink = computed.critical.has(depId) && computed.critical.has(task.id);
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal">
+          <div class="modal-header">
+            <h3 class="modal-title">Edit Dependencies: ${task.id} - ${task.name}</h3>
+            <button class="close-btn">×</button>
+          </div>
           
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          path.setAttribute('d', `M ${predEndX} ${predY} H ${midX} V ${tgtY} H ${tgtX}`);
-          path.setAttribute('fill', 'none');
-          path.setAttribute('stroke', isCritLink ? '#ef4444' : '#9ca3af');
-          path.setAttribute('stroke-width', '2');
-          
-          // Only add arrowhead if there's at least 1 day gap
-          if (hasGap) {
-            path.setAttribute('marker-end', isCritLink ? 'url(#arrow-red)' : 'url(#arrow-gray)');
-          }
-          
-          paths.appendChild(path);
-        });
+          <div class="modal-section">
+            <div class="modal-section-title">Select Predecessor Tasks:</div>
+            <div class="dependency-list" id="dependency-list"></div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="modal-btn modal-btn-secondary" id="cancel-btn">Cancel</button>
+            <button class="modal-btn modal-btn-primary" id="save-btn">Save Changes</button>
+          </div>
+        </div>
+      `;
+
+      const depList = modal.querySelector('#dependency-list');
+      const tempDeps = new Set(task.deps);
+
+      project.tasks.forEach(t => {
+        if (t.id === taskId) return;
+        
+        const wouldCreateCycle = (depId) => {
+          const visited = new Set();
+          const checkCycle = (id) => {
+            if (id === taskId) return true;
+            if (visited.has(id)) return false;
+            visited.add(id);
+            const depTask = project.tasks.find(dt => dt.id === id);
+            return depTask?.deps.some(d => checkCycle(d));
+          };
+          return checkCycle(depId);
+        };
+
+        const isChecked = tempDeps.has(t.id);
+        const wouldCycle = !isChecked && wouldCreateCycle(t.id);
+
+        const item = document.createElement('div');
+        item.className = 'dependency-item';
+        if (wouldCycle) {
+          item.style.opacity = '0.5';
+          item.style.cursor = 'not-allowed';
+        }
+        
+        item.innerHTML = `
+          <input type="checkbox" class="checkbox" id="dep-${t.id}" ${isChecked ? 'checked' : ''} ${wouldCycle ? 'disabled' : ''}>
+          <div class="dependency-info">
+            <div class="dependency-name">${t.id}: ${t.name}</div>
+            <div class="dependency-duration">Duration: ${t.duration} days${wouldCycle ? ' (would create cycle)' : ''}</div>
+          </div>
+        `;
+
+        const checkbox = item.querySelector('.checkbox');
+        if (!wouldCycle) {
+          item.onclick = () => {
+            checkbox.checked = !checkbox.checked;
+            if (checkbox.checked) {
+              tempDeps.add(t.id);
+            } else {
+              tempDeps.delete(t.id);
+            }
+          };
+        }
+
+        depList.appendChild(item);
       });
+
+      modal.querySelector('.close-btn').onclick = () => modal.remove();
+      modal.querySelector('#cancel-btn').onclick = () => modal.remove();
+      modal.querySelector('#save-btn').onclick = () => {
+        task.deps = Array.from(tempDeps);
+        state.minStart = {};
+        render();
+        modal.remove();
+      };
+
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+      };
+
+      document.getElementById('modal-container').appendChild(modal);
     }
+
+    function openCompareModal() {
+      const project = getCurrentProject();
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal compare-modal">
+          <div class="modal-header">
+            <h3 class="modal-title">Model Answer: ${project.name}</h3>
+            <button class="close-btn">×</button>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <img src="${project.modelAnswerImage}" alt="Model Answer for ${project.name}" class="model-answer-image" />
+          </div>
+
+          <div class="modal-footer">
+            <button class="modal-btn modal-btn-secondary" id="close-compare-btn">Close</button>
+          </div>
+        </div>
+      `;
+
+      modal.querySelector('.close-btn').onclick = () => modal.remove();
+      modal.querySelector('#close-compare-btn').onclick = () => modal.remove();
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+      };
+
+      document.getElementById('modal-container').appendChild(modal);
+    }
+
+    document.getElementById('compare-btn').onclick = openCompareModal;
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
