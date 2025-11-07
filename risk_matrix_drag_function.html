@@ -413,67 +413,67 @@ const phase1Actions = [
 ];
 
 const phase2RisksGood = [
-    { id: 'R6', description: 'Builder access to site is harder than anticipated, possibly some damage to your garden and curb side', correct: [3, 2] },
-    { id: 'R7', description: 'Builders cars on streets disrupts your neighbours and causes congestion', correct: [2, 3] },
-    { id: 'R8', description: 'Concrete pour delayed due to potential rain', correct: [1, 2] },
-    { id: 'R9', description: 'Supplies delayed', correct: [2, 2] },
-    { id: 'R10', description: 'Temporary power supply disruptions to site due to unrelated council works', correct: [1, 2] }
+    { id: 'R6G', description: 'Builder access to site is harder than anticipated, possibly some damage to your garden and curb side', correct: [3, 2] },
+    { id: 'R7G', description: 'Builders cars on streets disrupts your neighbours and causes congestion', correct: [2, 3] },
+    { id: 'R8G', description: 'Concrete pour delayed due to potential rain', correct: [1, 2] },
+    { id: 'R9G', description: 'Supplies delayed', correct: [2, 2] },
+    { id: 'R10G', description: 'Temporary power supply disruptions to site due to unrelated council works', correct: [1, 2] }
 ];
 
 const phase2RisksBad = [
-    { id: 'R6', description: 'Structural issues uncovered partway through demolition, impacting deadlines and budget', correct: [1, 2] },
-    { id: 'R7', description: 'Council planning permissions arrive after work has begun and require reworks', correct: [1, 3] },
-    { id: 'R8', description: 'Concrete pour impacted due to potential rain', correct: [2, 2] },
-    { id: 'R9', description: 'Safety incident shuts down site due to trade overlapping without clear communication', correct: [1, 1] },
-    { id: 'R10', description: 'Budgetary constraints mean supplies have to be downgraded', correct: [3, 3] }
+    { id: 'R6B', description: 'Structural issues uncovered partway through demolition, impacting deadlines and budget', correct: [1, 2] },
+    { id: 'R7B', description: 'Council planning permissions arrive after work has begun and require reworks', correct: [1, 3] },
+    { id: 'R8B', description: 'Concrete pour impacted due to potential rain', correct: [2, 2] },
+    { id: 'R9B', description: 'Safety incident shuts down site due to trade overlapping without clear communication', correct: [1, 1] },
+    { id: 'R10B', description: 'Budgetary constraints mean supplies have to be downgraded', correct: [3, 3] }
 ];
 
 const phase2ActionsGood = [
-    { id: 'A6', text: 'Plan to restore plants after building work is complete', quality: 'good' },
-    { id: 'A7', text: 'Schedule buffer days for weather delays, increasing the deadline', quality: 'good' },
-    { id: 'A8', text: 'Ask neighbours to park elsewhere while your building work is on-going', quality: 'bad' },
-    { id: 'A9', text: 'Set up backup power generators', quality: 'good' },
-    { id: 'A10', text: 'Skip some minor inspections to save time', quality: 'bad' }
+    { id: 'A6G', text: 'Plan to restore plants after building work is complete', quality: 'good' },
+    { id: 'A7G', text: 'Schedule buffer days for weather delays, increasing the deadline', quality: 'good' },
+    { id: 'A8G', text: 'Ask neighbours to park elsewhere while your building work is on-going', quality: 'bad' },
+    { id: 'A9G', text: 'Set up backup power generators', quality: 'good' },
+    { id: 'A10G', text: 'Skip some minor inspections to save time', quality: 'bad' }
 ];
 
 const phase2ActionsBad = [
-    { id: 'A6', text: 'Hire structural engineering consultant, impacting budget', quality: 'good' },
-    { id: 'A7', text: 'Prioritise council planning permits being approved', quality: 'good' },
-    { id: 'A8', text: 'Use cheaper supplies and tradespeople to avoid more financial issues', quality: 'bad' },
-    { id: 'A9', text: 'Implement strict safety protocols and better on-site communication', quality: 'good' },
-    { id: 'A10', text: 'Do some of the work yourself to save on labour costs', quality: 'bad' }
+    { id: 'A6B', text: 'Hire structural engineering consultant, impacting budget', quality: 'good' },
+    { id: 'A7B', text: 'Prioritise council planning permits being approved', quality: 'good' },
+    { id: 'A8B', text: 'Use cheaper supplies and tradespeople to avoid more financial issues', quality: 'bad' },
+    { id: 'A9B', text: 'Implement strict safety protocols and better on-site communication', quality: 'good' },
+    { id: 'A10B', text: 'Do some of the work yourself to save on labour costs', quality: 'bad' }
 ];
 
 const phase3RisksGood = [
-    { id: 'R11', description: 'Final installation requires expensive specialist', correct: [2, 2] },
-    { id: 'R12', description: 'Final third party inspection scheduling delays', correct: [2, 3] },
-    { id: 'R13', description: 'Substantial damage to garden, more than you had anticipated', correct: [3, 2] },
-    { id: 'R14', description: 'You want to make minor final modifications after seeing some elements in person for the first time.', correct: [3, 1] },
-    { id: 'R15', description: 'Parents arriving early', correct: [1, 2] }
+    { id: 'R11G', description: 'Final installation requires expensive specialist', correct: [2, 2] },
+    { id: 'R12G', description: 'Final third party inspection scheduling delays', correct: [2, 3] },
+    { id: 'R13G', description: 'Substantial damage to garden, more than you had anticipated', correct: [3, 2] },
+    { id: 'R14G', description: 'You want to make minor final modifications after seeing some elements in person for the first time.', correct: [3, 1] },
+    { id: 'R15G', description: 'Parents arriving early', correct: [1, 2] }
 ];
 
 const phase3RisksBad = [
-    { id: 'R11', description: 'Finalisation build steps skipped to meet deadline', correct: [1, 3] },
-    { id: 'R12', description: 'Building fails code compliance review', correct: [0, 2] },
-    { id: 'R13', description: 'Build not ready when parents are arriving', correct: [1, 2] },
-    { id: 'R14', description: 'Last-minute fixes needed due to rushed or poor work done yourself.', correct: [3, 3] },
-    { id: 'R15', description: 'Budget issues mean contractors paid late, work delayed further', correct: [1, 3] }
+    { id: 'R11B', description: 'Finalisation build steps skipped to meet deadline', correct: [1, 3] },
+    { id: 'R12B', description: 'Building fails code compliance review', correct: [0, 2] },
+    { id: 'R13B', description: 'Build not ready when parents are arriving', correct: [1, 2] },
+    { id: 'R14B', description: 'Last-minute fixes needed due to rushed or poor work done yourself.', correct: [3, 3] },
+    { id: 'R15B', description: 'Budget issues mean contractors paid late, work delayed further', correct: [1, 3] }
 ];
 
 const phase3ActionsGood = [
-    { id: 'A11', text: 'Conduct thorough pre-final inspection', quality: 'good' },
-    { id: 'A12', text: 'Properly record finishes and cosmetic details to make future maintenance easy', quality: 'good' },
-    { id: 'A13', text: 'Rush final touches to finish early', quality: 'bad' },
-    { id: 'A14', text: 'Schedule buffer for parents arriving', quality: 'good' },
-    { id: 'A15', text: 'Skip final quality checks as no issues have arisen thus far', quality: 'bad' }
+    { id: 'A11G', text: 'Conduct thorough pre-final inspection', quality: 'good' },
+    { id: 'A12G', text: 'Properly record finishes and cosmetic details to make future maintenance easy', quality: 'good' },
+    { id: 'A13G', text: 'Rush final touches to finish early', quality: 'bad' },
+    { id: 'A14G', text: 'Schedule buffer for parents arriving', quality: 'good' },
+    { id: 'A15G', text: 'Skip final quality checks as no issues have arisen thus far', quality: 'bad' }
 ];
 
 const phase3ActionsBad = [
-    { id: 'A11', text: 'Organise for parents to stay elsewhere to extend deadline', quality: 'good' },
-    { id: 'A12', text: 'Ask for help from friends and family for any non-specialised work', quality: 'good' },
-    { id: 'A13', text: 'Cover up defects cosmetically', quality: 'bad' },
-    { id: 'A14', text: 'Reprioritise to finish buld and hope to rework some components in the future', quality: 'good' },
-    { id: 'A15', text: 'Ignore unpaid contractors and employ new ones to finish the build', quality: 'bad' }
+    { id: 'A11B', text: 'Organise for parents to stay elsewhere to extend deadline', quality: 'good' },
+    { id: 'A12B', text: 'Ask for help from friends and family for any non-specialised work', quality: 'good' },
+    { id: 'A13B', text: 'Cover up defects cosmetically', quality: 'bad' },
+    { id: 'A14B', text: 'Reprioritise to finish buld and hope to rework some components in the future', quality: 'good' },
+    { id: 'A15B', text: 'Ignore unpaid contractors and employ new ones to finish the build', quality: 'bad' }
 ];
 
 const impact = ['Catastrophic', 'High', 'Medium', 'Low', 'Negligible'];
@@ -794,32 +794,32 @@ function displayResults(score, feedback, goodActions) {
         'A5': 'Focus should be on project risk management rather than personal contingency planning.',
         
         // Phase 2 Good Path Actions
-        'A6': 'Good planning! Addressing landscaping restoration early prevents future issues.',
-        'A7': 'Smart decision! Weather buffer in the schedule prevents cascade of delays.',
-        'A8': 'Poor neighbor relations could create project complications and complaints.',
-        'A9': 'Excellent! Backup power ensures work continuity despite external disruptions.',
-        'A10': 'Skipping inspections, even minor ones, often leads to issues later.',
+        'A6G': 'Good planning! Addressing landscaping restoration early prevents future issues.',
+        'A7G': 'Smart decision! Weather buffer in the schedule prevents cascade of delays.',
+        'A8G': 'Poor neighbor relations could create project complications and complaints.',
+        'A9G': 'Excellent! Backup power ensures work continuity despite external disruptions.',
+        'A10G': 'Skipping inspections, even minor ones, often leads to issues later.',
         
         // Phase 2 Bad Path Actions
-        'A6': 'Right call! Expert structural help is worth the cost when issues arise.',
-        'A7': 'Critical decision! Proper permits must be prioritized to prevent work stoppage.',
-        'A8': 'Cutting costs on materials often leads to quality and safety issues.',
-        'A9': 'Excellent choice! Safety and communication are essential for project success.',
-        'A10': 'DIY work to save costs often leads to quality issues and rework. Focus should be on righting the structure and ensuring council compliance.',
+        'A6B': 'Right call! Expert structural help is worth the cost when issues arise.',
+        'A7B': 'Critical decision! Proper permits must be prioritized to prevent work stoppage.',
+        'A8B': 'Cutting costs on materials often leads to quality and safety issues.',
+        'A9B': 'Excellent choice! Safety and communication are essential for project success.',
+        'A10B': 'DIY work to save costs often leads to quality issues and rework. Focus should be on righting the structure and ensuring council compliance.',
         
         // Phase 3 Good Path Actions
-        'A11': 'Smart choice! Thorough inspection prevents post-completion issues.',
-        'A12': 'Good planning! Proper documentation helps with maintenance and warranty.',
-        'A13': 'Rushing final work often leads to quality issues and callbacks.',
-        'A14': 'Excellent! Buffer time for when your parents arrive reduces stress and rushing.',
-        'A15': 'Never skip quality checks, even with a good track record.',
+        'A11G': 'Smart choice! Thorough inspection prevents post-completion issues.',
+        'A12G': 'Good planning! Proper documentation helps with maintenance and warranty.',
+        'A13G': 'Rushing final work often leads to quality issues and callbacks.',
+        'A14G': 'Excellent! Buffer time for when your parents arrive reduces stress and rushing.',
+        'A15G': 'Never skip quality checks, even with a good track record.',
         
         // Phase 3 Bad Path Actions
-        'A11': 'Good solution! Alternative accommodation helps manage deadline pressure.',
-        'A12': 'Smart thinking! Using help appropriately can speed up non-critical work.',
-        'A13': 'Cosmetic fixes without addressing root causes will lead to future problems.',
-        'A14': 'Practical approach! Prioritizing completion with planned future improvements.',
-        'A15': 'Payment disputes with contractors often escalate and delay completion.'
+        'A11B': 'Good solution! Alternative accommodation helps manage deadline pressure.',
+        'A12B': 'Smart thinking! Using help appropriately can speed up non-critical work.',
+        'A13B': 'Cosmetic fixes without addressing root causes will lead to future problems.',
+        'A14B': 'Practical approach! Prioritizing completion with planned future improvements.',
+        'A15B': 'Payment disputes with contractors often escalate and delay completion.'
     };
 
     const actionFb = selectedActions.map(id => {
