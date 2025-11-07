@@ -413,11 +413,11 @@
 
       // Display results
       if (allCorrect && stakeholderCards.length === 4 && commsCards.length === 4) {
-          showModal('🎉 Perfect!', 'All cards are in the correct columns!');
+          showModal('Correct!', 'All cards are in the correct columns!');
       } else {
               let message = `<p><strong>Risk trigger answers:</strong> ${results.stakeholderGroup.correct}/${results.stakeholderGroup.total} correct</p>`;
         message += `<p><strong>Early warning signs answer:</strong> ${results.commsTools.correct}/${results.commsTools.total} correct</p>`;
-        message += '<p style="margin-top: 20px; font-size: 0.95em;">Green border = correct, Red border = incorrect</p>';
+        // message += '<p style="margin-top: 20px; font-size: 0.95em;">Green border = correct, Red border = incorrect</p>';
         showModal('Results', message);
       }
     }
