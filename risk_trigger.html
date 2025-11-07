@@ -267,12 +267,12 @@
     <div class="board">
 
       <div class="column">
-        <div class="column-header">Risk trigger answers</div>
+        <div class="column-header">Risk trigger</div>
         <div class="cards-container" data-column="leftCol"></div>
       </div>
 
       <div class="column">
-        <div class="column-header">Early warning signs answer</div>
+        <div class="column-header">Early warning signs</div>
         <div class="cards-container" data-column="rightCol"></div>
       </div>
     </div>
@@ -410,11 +410,11 @@
 
       // Display results
       if (allCorrect && leftCards.length === 3 && rightCards.length === 3) {
-        showModal('🎉 Perfect!', 'All cards are in the correct columns!');
+        showModal('Correct!', 'All cards are in the correct columns!');
       } else {
         let message = `<p><strong>Risk trigger answers:</strong> ${results.leftCol.correct}/${results.leftCol.total} correct</p>`;
         message += `<p><strong>Early warning signs answer:</strong> ${results.rightCol.correct}/${results.rightCol.total} correct</p>`;
-        message += '<p style="margin-top: 20px; font-size: 0.95em;">Green border = correct, Red border = incorrect</p>';
+        // message += '<p style="margin-top: 20px; font-size: 0.95em;">Green border = correct, Red border = incorrect</p>';
         showModal('Results', message);
       }
     }
