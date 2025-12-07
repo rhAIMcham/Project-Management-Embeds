@@ -1652,6 +1652,29 @@ function handleMouseUp() {
 }
 
 // ============================================================================
+// EVENT HANDLERS - KEYBOARD
+// ============================================================================
+
+function handleEscapeKey(e) {
+  if (e.key === 'Escape' || e.keyCode === 27) {
+    const modal = document.getElementById('modal');
+    const taskEditorModal = document.getElementById('task-editor-modal');
+    
+    // Close general modal if visible
+    if (modal && modal.style.display !== 'none') {
+      closeModal();
+      return;
+    }
+    
+    // Close task editor modal if visible
+    if (taskEditorModal && taskEditorModal.style.display !== 'none') {
+      closeTaskEditor();
+      return;
+    }
+  }
+}
+
+// ============================================================================
 // VALIDATION
 // ============================================================================
 
@@ -1950,6 +1973,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', handleResize);
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('mouseup', handleMouseUp);
+  document.addEventListener('keydown', handleEscapeKey);
   
   // Perform initial render
   handleResize(); // This ensures proper chart sizing
